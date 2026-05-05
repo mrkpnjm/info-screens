@@ -1,0 +1,24 @@
+{
+  "name": "info-screens",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+"scripts": {
+    "start": "node server.js",
+    "dev": "cross-env DEV_MODE=true node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitea.kood.tech/jorgensinka/info-screens"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
+}
