@@ -41,32 +41,9 @@ const requiredRoutes = [
   'leader-board', 'next-race', 'race-countdown', 'race-flags'
 ];
 
-// Dynamically create the routes
-requiredRoutes.forEach(route => {
-  app.get(`/${route}`, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'views', `${route}.html`));
-  });
-});
-
 // The helpful homepage directory
-app.get('/', (req, res) => {
-  res.send(`
-    <h1>Beachside Racetrack Server</h1>
-    <p>The server is running! Choose an interface below:</p>
-    <ul>
-      <li><strong>Employees:</strong> 
-        <a href="/front-desk">Front Desk</a> | 
-        <a href="/race-control">Race Control</a> | 
-        <a href="/lap-line-tracker">Lap-line Tracker</a>
-      </li>
-      <li><strong>Public Displays:</strong> 
-        <a href="/leader-board">Leader Board</a> | 
-        <a href="/next-race">Next Race</a> | 
-        <a href="/race-countdown">Countdown</a> | 
-        <a href="/race-flags">Flags</a>
-      </li>
-    </ul>
-  `);
+app.get(/.*|/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // --- 6. REAL-TIME SOCKET.IO ---
