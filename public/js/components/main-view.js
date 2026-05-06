@@ -1,3 +1,5 @@
+import { navigateTo } from '../main.js';
+
 export const renderMainView = (container, socket) => {
     // Structural template for the Main View
     container.innerHTML = `
@@ -12,6 +14,6 @@ export const renderMainView = (container, socket) => {
     
     frontDeskBtn.addEventListener('click', () => {
         // Logic to switch to the Front Desk view
-        socket.emit('viewChange', 'frontDesk');
+        navigateTo('/front-desk');
     });
 }
