@@ -3,36 +3,57 @@ import { navigateTo } from "../main.js";
 export const renderFrontDesk = (container, socket) => {
     // Structural template for the Front Desk view
     container.innerHTML = `
-        <div class="view-container">
-            <h2>Driver Registration</h2>
-            <div class="form-card">
-                <input type="text" id="driverOneName" placeholder="Driver's Name">
-                <input type="text" id="driverTwoName">
+        <div class="front-desk-layout">
+            <h2>Racetrack MVP</h2>
+            <h3>FRONT DESK</h3>
+            <div class="registration-side">
+                <div class="input-grid">
+                    ${[1, 2, 3, 4, 5, 6, 7, 8].map(i => `
+                        <div class="input-group">
+                            <label>CAR ${i}</label>
+                            <input type="text" class="driver-input" data-car="${i}" placeholder="Type Driver's Name...">
+                        </div>
+                    `).join('')}
+                    
+                </div>
                 <button id="registerBtn">Register a Race</button>
+                <button id="backBtn">Back to Main Menu</button>
             </div>
-            <div id="raceList"></div>
-            <button class="secondary" id="backBtn">Back to Main Menu</button>
+
+            <div class="display-side">
+                <h2>RACES</h2>
+                <div id="raceList"><!-- Races appear here --></div>
+            </div>
         </div>
     `;
 
     // Interactivity for the registration form
-    const addBtn = document.getElementById('registerBtn');
+    const registerBtn = document.getElementById('registerBtn');
     const backBtn = document.getElementById('backBtn');
-    const nameInput1 = document.getElementById('driverOneName');
-    const nameInput2 = document.getElementById('driverTwoName');
+    const inputs = document.querySelectorAll('.driver-input');
+    const raceList = document.getElementById('raceList');
 
-    addBtn.addEventListener('click', () => {
-        const raceData = {
-            driver1: nameInput1.value,
-            driver2: nameInput2.value
-        };
+    // Send data to server
+    registerBtn.addEventListener('click', () => {
+        const drivers = Array.from(inputs).map(input => input.value.trim || 'Empty');
+        socket.emit('registerRace', drivers); // Send to server
 
-        if (raceData.driver1 && raceData.driver2) {
-            // Logic for registering the race
-            socket.emit('addRace', raceData);
-            nameInput1.value = '';
-            nameInput2.value = '';
-        }
+        // Clear inputs for the next race
+        inputs.forEach(input => input.value = '');
+    });
+
+    // Listen for the server to send the updated list
+    socket.on('updateRaces', (races) => {
+        raceList.innerHTML = races.map((race, index) => `
+            <div class="race-card">
+                <h3>Race ${index + 1}</h3>
+                <div class="race-drivers">
+                    ${race.map((name, i) => `<p>${i + 1}st Racer: ${name}</p>`).join('')}
+                </div>
+                <button onclick="console.log('Edit')">EDIT RACE</button>
+                <button onclick="console.log('Delete')">DELETE RACE</button>
+            </div>
+        `).join('');
     });
 
     backBtn.addEventListener('click', () => {
