@@ -1,0 +1,182 @@
+/* public/css/lap-tracker.css */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #2C2C2C;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Persistent Header */
+.top-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    color: #4096A6;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.page-title {
+    color: #C57979;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+/* View Manager */
+.view { 
+    display: none; 
+    width: 100%; 
+    max-width: 800px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+body > .view { display: none; } /* Hide all by default */
+body > .view.active { display: flex; } /* Show only active */
+.hidden { display: none !important; }
+
+/* -----------------------------------
+   VIEW 1: LOGIN 
+----------------------------------- */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    width: 450px;
+    margin-bottom: 30px;
+}
+
+.input-group label {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 5px;
+    margin-left: 2px;
+}
+
+.input-group input {
+    height: 60px;
+    background-color: #D9D9D9;
+    border: none;
+    outline: none;
+    font-size: 24px;
+    padding: 0 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-login {
+    background-color: #4096A6;
+    color: #000000;
+    border: none;
+    border-radius: 20px;
+    width: 250px;
+    height: 65px;
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.btn-login:active {
+    transform: scale(0.97);
+}
+
+.error-msg { 
+    color: #C57979; 
+    font-weight: bold; 
+    margin-top: 20px; 
+}
+
+/* -----------------------------------
+   VIEW 2: NO ONGOING RACE 
+----------------------------------- */
+.no-race-box {
+    background-color: #96CAFF; /* Light blue from Figma */
+    width: 750px;
+    height: 350px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-race-box h2 {
+    color: #000000;
+    font-size: 42px;
+    font-weight: 900;
+    margin: 0;
+}
+
+/* -----------------------------------
+   VIEW 3: ONGOING RACE (Backend logic UI)
+----------------------------------- */
+.instruction { 
+    color: #a0a0b0; 
+    font-size: 1.2rem; 
+    margin-bottom: 30px; 
+}
+
+.car-grid {
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 30px; 
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.btn-car {
+    background: #4096A6; 
+    border: none; 
+    border-radius: 20px;
+    height: 180px; 
+    cursor: pointer; 
+    font-size: 48px;
+    font-weight: 900;
+    color: #000;
+    transition: transform 0.1s;
+}
+
+.btn-car:active { 
+    transform: scale(0.95); 
+    background: #C57979; 
+}
+
+/* Lap Log */
+.log-box {
+    background: #1a1a1a; 
+    width: 100%;
+    height: 250px;
+    overflow-y: auto;
+    padding: 20px; 
+    border-radius: 12px;
+    font-family: monospace; 
+    color: #96CAFF; 
+    text-align: left;
+}
+
+.log-box p {
+    margin: 6px 0; 
+}

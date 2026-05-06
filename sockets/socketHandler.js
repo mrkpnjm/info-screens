@@ -1,10 +1,22 @@
 // sockets/socketHandler.js
 
 module.exports = function(io) {
+  // --- RACE STATE MANAGER ---
+  // This keeps track of everything happening in the current race.
+  const raceState = {
+    mode: 'Ongoing', // Hardcoded to 'Ongoing' right now so we can test the buttons!
+    startTime: Date.now(), // Hardcoding a start time for testing
+    cars: {
+      '7': { currentLap: 0, lapTimes: [], fastestLap: null },
+      '42': { currentLap: 0, lapTimes: [], fastestLap: null },
+      '88': { currentLap: 0, lapTimes: [], fastestLap: null }
+    }
+  };
+
   io.on('connection', (socket) => {
-    console.log('A device connected to the racetrack server! (ID:', socket.id, ')');
+    console.log('🔌 A device connected! (ID:', socket.id, ')');
     
-    // Listen for an 'authenticate' event from the frontend
+    // --- AUTHENTICATION LOGIC ---
     socket.on('authenticate', (data, callback) => {
       const { role, key } = data;
       let expectedKey;
@@ -16,21 +28,73 @@ module.exports = function(io) {
         return callback({ success: false, message: 'Invalid role.' });
       }
 
-      // -- THE AUTHENTICATION LOGIC --
       if (key === expectedKey) {
-        console.log(`${role} authenticated successfully.`);
+        console.log(`✅ ${role} authenticated successfully.`);
         socket.join(role); 
-        callback({ success: true, message: 'Access granted.' });
+        // We now send the raceState to the frontend on a successful login!
+        callback({ success: true, message: 'Access granted.', currentRaceState: raceState });
       } else {
-        console.log(`Failed login attempt for ${role}.`);
+        console.log(`⚠️ Failed login attempt for ${role}.`);
         setTimeout(() => {
           callback({ success: false, message: 'Incorrect access key. Please try again.' });
         }, 500);
       }
     });
 
+    // --- LAP-LINE TRACKER LOGIC ---
+    // Listen for when the observer presses a car button on their tablet
+    socket.on('record_lap', (data, callback) => {
+      const { carNumber } = data;
+
+      // 1. Security Check: Is the race actually running?
+      if (raceState.mode === 'Ended' || raceState.mode === 'Danger') {
+        return callback({ success: false, message: 'Cannot record laps right now.' });
+      }
+
+      // 2. Check if the car exists
+      const car = raceState.cars[carNumber];
+      if (!car) {
+        return callback({ success: false, message: 'Car not found.' });
+      }
+
+      // 3. Calculate the lap time
+      const now = Date.now();
+      let lapTimeMs = 0;
+
+      if (car.currentLap === 0) {
+        // Lap 1: Time from race start to crossing the line
+        lapTimeMs = now - raceState.startTime;
+      } else {
+        // Lap 2+: Time since they last crossed the line
+        const totalPreviousTime = car.lapTimes.reduce((a, b) => a + b, 0);
+        const timeSinceRaceStart = now - raceState.startTime;
+        lapTimeMs = timeSinceRaceStart - totalPreviousTime;
+      }
+
+      // 4. Save the data to our state manager
+      car.currentLap += 1;
+      car.lapTimes.push(lapTimeMs);
+
+      // Check if it's their new fastest lap
+      if (!car.fastestLap || lapTimeMs < car.fastestLap) {
+        car.fastestLap = lapTimeMs;
+      }
+
+      console.log(`⏱️ Car ${carNumber} completed Lap ${car.currentLap} in ${lapTimeMs / 1000}s`);
+
+      // 5. Broadcast this update to the Leader Board
+      io.emit('lap_updated', { 
+        carNumber, 
+        currentLap: car.currentLap, 
+        fastestLap: car.fastestLap 
+      });
+
+      // 6. Tell the tablet it was successful
+      callback({ success: true, lapTimeMs: lapTimeMs });
+    });
+
     socket.on('disconnect', () => {
-      console.log('A device disconnected.');
+      console.log('🔌 A device disconnected.');
     });
   });
 };
