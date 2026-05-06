@@ -1,6 +1,7 @@
 // sockets/socketHandler.js
 
 const setupLapLineTracker = require('./lapLineTracker');
+const setupRaceControl = require('./raceControl');
 
 module.exports = function(io) {
 
@@ -21,6 +22,7 @@ module.exports = function(io) {
   };
 
   setupLapLineTracker(io, raceState);
+  setupRaceControl(io, raceState);
 
   io.on('connection', (socket) => {
     console.log('A device connected to the racetrack server! (ID:', socket.id, ')');
