@@ -51,6 +51,30 @@ module.exports = function(io) {
       io.emit('updateRaces', raceHistory);
     });
 
+    // -- RACE EDITING LOGIC --
+    socket.on('editRace', (updatedData) => {
+      // Find the index of the race with the matching ID
+      const index = raceHistory.findIndex(r => r.id === updatedData.id);
+    
+      if(index !== -1) {
+        // Update the drivers but keep the original ID and timestamp
+        raceHistory[index].drivers = updatedData.drivers;
+
+        console.log(`Race ID ${updatedData.id} updated.`);
+
+        // Broadcast the updated history to everyone
+        io.emit('updateRaces', raceHistory);
+      }
+    });
+
+    socket.on('deleteRace', (raceId) => {
+      const index = raceHistory.findIndex(r => r.id === raceId);
+      if (index !== -1) {
+        raceHistory.splice(index, 1); // Remove the race
+        io.emit('updateRaces', raceHistory); // Notify all clients
+      }
+    });
+
     socket.on('disconnect', () => {
       console.log('A device disconnected.');
     });
