@@ -1,3 +1,5 @@
+import { navigateTo } from "../main.js";
+
 export const renderFrontDesk = (container, socket) => {
     // Structural template for the Front Desk view
     container.innerHTML = `
@@ -35,6 +37,6 @@ export const renderFrontDesk = (container, socket) => {
 
     backBtn.addEventListener('click', () => {
         // Logic to go back to the main menu
-        socket.emit('viewChange', 'mainMenu');
+        navigateTo('/');
     });
 }
