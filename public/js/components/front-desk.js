@@ -35,7 +35,11 @@ export const renderFrontDesk = (container, socket) => {
 
     // Send data to server
     registerBtn.addEventListener('click', () => {
-        const drivers = Array.from(inputs).map(input => input.value.trim || 'Empty');
+
+        const inputs = document.querySelectorAll('.driver-input');
+        const drivers = Array.from(inputs).map(input => {
+            return input.value.trim() !== "" ? input.value : '';
+        });
         socket.emit('registerRace', drivers); // Send to server
 
         // Clear inputs for the next race
@@ -44,17 +48,26 @@ export const renderFrontDesk = (container, socket) => {
 
     // Listen for the server to send the updated list
     socket.on('updateRaces', (races) => {
+        const raceList = document.getElementById('raceList');
+
         raceList.innerHTML = races.map((race, index) => `
             <div class="race-card">
                 <h3>Race ${index + 1}</h3>
                 <div class="race-drivers">
-                    ${race.map((name, i) => `<p>${i + 1}st Racer: ${name}</p>`).join('')}
+                    ${race.drivers.map((name, i) => `<p>${i + 1}${getOrdinal(i + 1)} Racer: ${name}</p>`).join('')}
                 </div>
                 <button onclick="console.log('Edit')">EDIT RACE</button>
                 <button onclick="console.log('Delete')">DELETE RACE</button>
             </div>
         `).join('');
     });
+
+    // Helper function to get ordinal suffixes
+    const getOrdinal = (n) => {
+        const s = ["th", "st", "nd", "rd"],
+              v = n % 100;
+        return s[(v - 20) % 10] || s[v] || s[0];
+    }
 
     backBtn.addEventListener('click', () => {
         // Logic to go back to the main menu
