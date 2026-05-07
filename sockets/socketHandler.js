@@ -4,6 +4,23 @@ const setupRaceControl = require('./raceControl');
 
 module.exports = function(io) {
 
+  const raceState = {
+    mode: "SAFE",
+    upcomingSession: {
+      drivers: [
+        { name: "D1", car: 1, fastestLap: null, currentLap: 0 },
+        { name: "D2", car: 2, fastestLap: null, currentLap: 0 },
+        { name: "D3", car: 3, fastestLap: null, currentLap: 0 },
+        { name: "D4", car: 4, fastestLap: null, currentLap: 0 },
+        { name: "D5", car: 5, fastestLap: null, currentLap: 0 },
+        { name: "D6", car: 6, fastestLap: null, currentLap: 0 },
+        { name: "D7", car: 7, fastestLap: null, currentLap: 0 },
+        { name: "D8", car: 8, currentLap: 0 }
+      ]
+    },
+    currentSession: null
+  };
+
   setupRaceControl(io, raceState);
 
   io.on('connection', (socket) => {
