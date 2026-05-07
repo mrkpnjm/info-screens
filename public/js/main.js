@@ -3,6 +3,7 @@
 
 import { renderMainView } from './components/main-view.js';
 import { renderFrontDesk } from './components/front-desk.js';
+import { renderLapTracker } from './components/lap-tracker.js';
 
 // 1. Connect to the Socket.IO server
 const socket = io();
@@ -11,7 +12,8 @@ const app = document.getElementById('app');
 // Define routes
 const routes = {
     '/': renderMainView,
-    '/front-desk': renderFrontDesk
+    '/front-desk': renderFrontDesk,
+    '/lap-line-tracker': renderLapTracker
     // -- Add more routes and their corresponding renderers as needed --
 }
 
@@ -47,6 +49,9 @@ socket.on('connect', () => {
 socket.on('viewChange', (viewName) => {
     if (viewName === 'frontDesk') {
         navigateTo('/front-desk');
+    }
+    if (viewName === 'lapTracker') {
+        navigateTo('/lap-tracker');
     }
     // Add more view renderers as needed (e.g., observerView, safetyView)
 });
