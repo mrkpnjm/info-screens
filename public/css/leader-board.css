@@ -1,0 +1,82 @@
+/* public/css/leaderboard.css */
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #2C2C2C;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Persistent Header (Matched to other screens) */
+.top-nav {
+    width: 100%;
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand { color: #4096A6; font-size: 42px; font-weight: 900; letter-spacing: -1px; }
+.page-title { color: #C57979; font-size: 28px; font-weight: 900; }
+
+/* Dashboard Layout */
+.dashboard {
+    width: 80%;
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+.status-banner {
+    background-color: #96CAFF;
+    color: #000;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+/* Table Styling */
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.leaderboard-table th {
+    background-color: #363636;
+    color: #a0a0b0;
+    padding: 20px;
+    text-align: left;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.leaderboard-table td {
+    padding: 25px 20px;
+    border-bottom: 1px solid #363636;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.leaderboard-table tr:last-child td { border-bottom: none; }
+
+/* Highlight the Top Position */
+.leaderboard-table tr:nth-child(1) td {
+    color: #2ed573;
+}
+
+.car-num {
+    color: #4096A6;
+    font-size: 32px;
+    font-weight: 900;
+}

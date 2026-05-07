@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Leaderboard | Beachside Racetrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/leader-board.css">
+</head>
+<body>
+    <header class="top-nav">
+        <div class="brand">Racetrack MVP</div>
+        <div class="page-title">LIVE LEADERBOARD</div>
+    </header>
+
+    <div class="dashboard">
+        <div class="status-banner" id="race-status">TRACK STATUS: LOADING...</div>
+        
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>POS</th>
+                    <th>CAR #</th>
+                    <th>LAPS COMPLETED</th>
+                    <th>FASTEST LAP</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/leader-board.js"></script>
+</body>
+</html>
