@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lap-Line Tracker | Beachside Racetrack</title>
+    <!-- Import Figma's exact font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lap-tracker.css">
+</head>
+<body>
+
+    <!-- PERSISTENT HEADER -->
+    <header class="top-nav">
+        <div class="brand">Racetrack MVP</div>
+        <div class="page-title">LAP-LINE TRACKER</div>
+    </header>
+
+    <!-- VIEW 1: LOGIN -->
+    <div id="view-login" class="view active">
+        <div class="login-container">
+            <div class="input-group">
+                <label for="access-key">Password:</label>
+                <input type="password" id="access-key">
+            </div>
+            <button onclick="login()" class="btn-login">LOGIN</button>
+            <p id="login-error" class="error-msg hidden"></p>
+        </div>
+    </div>
+
+    <!-- VIEW 2: NO ONGOING RACE -->
+    <div id="view-no-race" class="view">
+        <div class="no-race-box">
+            <h2>NO ONGOING RACE</h2>
+        </div>
+    </div>
+
+    <!-- VIEW 3: ONGOING RACE (Buttons for your backend logic) -->
+    <div id="view-ongoing" class="view">
+        <p class="instruction">Tap a car's button exactly as it crosses the line.</p>
+        <div class="car-grid">
+            <button class="btn-car" onclick="recordLap('7')">#7</button>
+            <button class="btn-car" onclick="recordLap('42')">#42</button>
+            <button class="btn-car" onclick="recordLap('88')">#88</button>
+        </div>
+        <div id="action-log" class="log-box">
+            <p><em>Waiting for first lap...</em></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/lap-tracker.js"></script>
+</body>
+</html>
