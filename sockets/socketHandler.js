@@ -18,7 +18,7 @@ module.exports = function(io) {
         { name: "D5", car: 5, fastestLap: null, currentLap: 0 },
         { name: "D6", car: 6, fastestLap: null, currentLap: 0 },
         { name: "D7", car: 7, fastestLap: null, currentLap: 0 },
-        { name: "D8", car: 8, currentLap: 0 }
+        { name: "D8", car: 8, fastestLap: null, currentLap: 0 }
       ]
     },
     currentSession: null

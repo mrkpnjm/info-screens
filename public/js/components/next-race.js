@@ -1,14 +1,16 @@
 export const renderNextRace = (container, socket) => {
 
     container.innerHTML = `
-        <div class="view-container">
-            <h1>Next Race</h1>
+    <div class="view-container">
+        <h1 class="title">Next Race</h1>
 
-            <ul id="driverList"></ul>
+        <ul id="driverList" class="driver-list"></ul>
 
-            <button id="startRaceBtn">Start Race</button>
-        </div>
-    `;
+        <button id="startRaceBtn" class="primary-btn">
+            Start Race
+        </button>
+    </div>
+`;
 
     const driverList = document.getElementById('driverList');
     const startBtn = document.getElementById('startRaceBtn');

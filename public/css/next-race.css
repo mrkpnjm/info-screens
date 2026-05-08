@@ -1,0 +1,31 @@
+.view-container {
+    padding: 40px;
+    font-family: Arial, sans-serif;
+}
+
+.title {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.driver-list {
+    list-style: none;
+    padding: 0;
+}
+
+.driver-list li {
+    background: #222;
+    color: white;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.primary-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: green;
+    color: white;
+    cursor: pointer;
+}
