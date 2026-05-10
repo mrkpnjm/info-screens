@@ -8,6 +8,7 @@ export const renderMainView = (container, socket) => {
             <button id="frontDeskBtn" class="menu-btn">Front Desk</button>
             <button id="lapLineTrackerBtn" class="menu-btn">Lap Line Tracker</button>
             <button id="raceControlBtn" class="menu-btn">Race Control</button>
+            <button id="leaderBoardBtn" class="menu-btn">Leaderboard</button>
             <!-- Add more role buttons as needed -->
         </div>
     `;
@@ -15,6 +16,7 @@ export const renderMainView = (container, socket) => {
     const frontDeskBtn = container.querySelector('#frontDeskBtn');
     const lapLineTrackerBtn = container.querySelector('#lapLineTrackerBtn');
     const raceControlBtn = container.querySelector('#raceControlBtn');
+    const leaderBoardBtn = container.querySelector('#leaderBoardBtn');
     
     frontDeskBtn.addEventListener('click', () => {
         // Logic to switch to the Front Desk view
@@ -29,5 +31,11 @@ export const renderMainView = (container, socket) => {
     raceControlBtn.addEventListener('click', () => {
         // Logic to switch to the Race Control view
         navigateTo('/race-control');
+    });
+
+        leaderBoardBtn.addEventListener('click', () => {
+        // Logic to switch to the Race Control view
+        navigateTo('/leader-board');
     })
+
 };

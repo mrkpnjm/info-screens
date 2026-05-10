@@ -5,6 +5,7 @@ import { renderMainView } from './components/main-view.js';
 import { renderFrontDesk } from './components/front-desk.js';
 import { renderLapTracker } from './components/lap-tracker.js';
 import { renderRaceControl } from './components/race-control.js';
+import { renderLeaderboard } from './components/leader-board.js';
 
 // 1. Connect to the Socket.IO server
 const socket = io();
@@ -15,7 +16,8 @@ const routes = {
     '/': renderMainView,
     '/front-desk': renderFrontDesk,
     '/lap-line-tracker': renderLapTracker,
-    '/race-control': renderRaceControl
+    '/race-control': renderRaceControl,
+    '/leader-board': renderLeaderboard
     // -- Add more routes and their corresponding renderers as needed --
 }
 
