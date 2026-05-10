@@ -34,13 +34,19 @@ module.exports = function(io) {
       raceState.nextRaceData = nextRace; // Pass the driver list to the UI
       raceState.startTime = null;
 
-      // Initialize lap tracking for the specific cars in this race
+// Initialize lap tracking for the specific cars in this race
       raceState.cars = {};
       nextRace.drivers.forEach(d => {
         if (d.car) {
-          raceState.cars[d.car] = { currentLap: 0, lapTimes: [], fastestLap: null };
+          raceState.cars[d.car] = { 
+            currentLap: 0, 
+            lapTimes: [], 
+            fastestLap: null, 
+            lapStartTime: null
+          };
         }
       });
+
     } else {
       // No more races left in history
       currentRaceIndex = raceHistory.length;
