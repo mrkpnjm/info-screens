@@ -198,60 +198,52 @@ module.exports = function(io) {
       callback(raceState);
     })
 
-    // --- LAP-LINE TRACKER LOGIC ---
-    // Listen for when the observer presses a car button on their tablet
+// --- LAP-LINE TRACKER LOGIC ---
     socket.on('record_lap', (data, callback) => {
       const { carNumber } = data;
 
-      // 1. Security Check: Is the race actually running?
       if (raceState.lifecycle !== 'race_on') {
         return callback({ success: false, message: 'Race not active' });
       }
-
-      // 2. Danger check: Only record if the race is not in Danger
       if (raceState.safety === 'Danger') {
         return callback({ success: false, message: 'Track is Red - Laps suspended'});
       }
 
-      // 3. Check if the car exists
       const car = raceState.cars[carNumber];
       if (!car) {
         return callback({ success: false, message: 'Car not found.' });
       }
 
-      // 4. Calculate the lap time
       const now = Date.now();
-      let lapTimeMs = 0;
-
-      if (car.currentLap === 0) {
-        // Lap 1: Time from race start to crossing the line
-        lapTimeMs = now - raceState.startTime;
-      } else {
-        // Lap 2+: Time since they last crossed the line
-        const totalPreviousTime = car.lapTimes.reduce((a, b) => a + b, 0);
-        const timeSinceRaceStart = now - raceState.startTime;
-        lapTimeMs = timeSinceRaceStart - totalPreviousTime;
+      
+      // FIX: Warmup Lap Logic (Lap countdown began from race start to first lap, 
+      // changed to LAP Starts when car crosses the lap first time.)
+      if (car.currentLap === 0 && !car.lapStartTime) {
+          car.lapStartTime = now;
+          console.log(`⏱️ Car ${carNumber} crossed the line. Stopwatch started!`);
+          return callback({ success: true, message: 'Stopwatch started', warmup: true });
       }
 
-      // 4. Save the data to our state manager
+      // Calculate time since they last crossed the line
+      const lapTimeMs = now - car.lapStartTime;
+      
+      // Update their new start time for the next lap
+      car.lapStartTime = now;
       car.currentLap++;
       car.lapTimes.push(lapTimeMs);
 
-      // Check if it's their new fastest lap
       if (!car.fastestLap || lapTimeMs < car.fastestLap) {
         car.fastestLap = lapTimeMs;
       }
 
       console.log(`⏱️ Car ${carNumber} completed Lap ${car.currentLap} in ${lapTimeMs / 1000}s`);
 
-      // 5. Broadcast this update to the Leader Board
       io.emit('lap_updated', { 
         carNumber, 
         currentLap: car.currentLap, 
         fastestLap: car.fastestLap 
       });
 
-      // 6. Tell the tablet it was successful
       callback({ success: true, lapTimeMs });
     });
 
