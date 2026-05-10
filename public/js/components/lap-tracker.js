@@ -5,41 +5,41 @@
 
 export const renderLapTracker = (container, socket) => {
     container.innerHTML = `
-        <div class ="lap-tracker-wrapper">
+        <div class ="lap-tracker-layout">
             <!-- PERSISTENT HEADER -->
             <header class="top-nav">
                 <div class="brand">Racetrack MVP</div>
-                <div class="page-title">LAP-LINE TRACKER</div>
+                <div class="page-title">FRONT DESK</div>
             </header>
 
             <!-- VIEW 1: LOGIN -->
-            <div id="view-login" class="view active">
+            <div id="viewLogin" class="view active">
                 <div class="login-container">
-                    <div class="input-group">
+                    <div class="login-input-group">
                         <label for="access-key">Password:</label>
-                        <input type="password" id="access-key">
+                        <input type="password" id="accessKey">
                     </div>
-                    <button id="loginBtn" class="btn-login">LOGIN</button>
-                    <p id="login-error" class="error-msg hidden"></p>
+                    <button id="loginBtn" class="login-btn">LOGIN</button>
+                    <p id="loginError" class="error-msg hidden"></p>
                 </div>
             </div>
 
             <!-- VIEW 2: NO ONGOING RACE -->
-            <div id="view-no-race" class="view">
+            <div id="viewNoRace" class="view">
                 <div class="no-race-box">
                     <h2>NO ONGOING RACE</h2>
                 </div>
             </div>
 
             <!-- VIEW 3: ONGOING RACE (Buttons for your backend logic) -->
-            <div id="view-ongoing" class="view">
+            <div id="viewOngoingRace" class="view">
                 <p class="instruction">Tap a car's button exactly as it crosses the line.</p>
                 <div class="car-grid">
-                    <button class="btn-car" data-car="7">#7</button>
-                    <button class="btn-car" data-car="42">#42</button>
-                    <button class="btn-car" data-car="88">#88</button>
+                    <button class="car-btn" data-car="7">#7</button>
+                    <button class="car-btn" data-car="42">#42</button>
+                    <button class="car-btn" data-car="88">#88</button>
                 </div>
-                <div id="action-log" class="log-box">
+                <div id="actionLog" class="log-box">
                     <p><em>Waiting for first lap...</em></p>
                 </div>
             </div>
@@ -47,9 +47,9 @@ export const renderLapTracker = (container, socket) => {
     `;
 
     const loginBtn = container.querySelector('#loginBtn');
-    const accessKeyInput = container.querySelector('#access-key');
-    const errorText = container.querySelector('#login-error');
-    const logBox = container.querySelector('#action-log');
+    const accessKeyInput = container.querySelector('#accessKey');
+    const errorText = container.querySelector('#loginError');
+    const logBox = container.querySelector('#actionLog');
 
     // Helper function to switch screens
     function showScreen(screenId) {
@@ -74,9 +74,9 @@ export const renderLapTracker = (container, socket) => {
                 // Check the race state sent by the server to decide which screen to show!
                 const mode = response.currentRaceState?.mode || 'Ended'; // Default
                 if (mode === 'Ended' || mode === 'Danger') {
-                    showScreen('view-no-race');
+                    showScreen('viewNoRace');
                 } else {
-                    showScreen('view-ongoing');
+                    showScreen('viewOngoingRace');
                 }
             } else {
                 // Show the error message (Wait for the 500ms penalty from the server!)
@@ -89,11 +89,28 @@ export const renderLapTracker = (container, socket) => {
     // 2. LISTEN FOR RACE STATUS CHANGES
     // The other team hasn't built this yet, but we are setting up the listener 
     // so frontend is ready when they do!
-    socket.on('race_status_changed', (newMode) => {
-        if (newMode === 'Ended' || newMode === 'Danger') {
-            showScreen('view-no-race');
+    socket.on('race_status_changed', (raceState) => {
+        const { lifecycle, safety } = raceState;
+        if (lifecycle === 'race_on') {
+            showScreen('viewOngoingRace');
         } else {
-            showScreen('view-ongoing');
+            showScreen('viewNoRace');
+        }
+    
+
+        // HANDLE SAFETY (VISUAL)
+        const body = document.body;
+        const carButtons = container.querySelectorAll('.car-btn');
+
+        if (safety === 'Danger') {
+            body.style.border = "10px solid #FF2121"; // Red border warning
+            carButtons.forEach(btn => btn.disabled = true);
+        } else if (safety == 'Hazard') {
+            body.style.border = "10px solid #F7FF12"; // Yellow border warning
+            carButtons.forEach(btn => btn.disabled = false);
+        } else {
+            body.style.border = "none";
+            carButtons.forEach(btn => btn.disabled = false);
         }
     });
 
@@ -109,7 +126,7 @@ export const renderLapTracker = (container, socket) => {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
     }
 
-    container.querySelectorAll('.btn-car').forEach(btn => {
+    container.querySelectorAll('.car-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const carNumber = btn.getAttribute('data-car');
             socket.emit('record_lap', { carNumber }, (response) => {
