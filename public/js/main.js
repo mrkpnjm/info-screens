@@ -4,6 +4,7 @@
 import { renderMainView } from './components/main-view.js';
 import { renderFrontDesk } from './components/front-desk.js';
 import { renderLapTracker } from './components/lap-tracker.js';
+import { renderRaceControl } from './components/race-control.js';
 
 // 1. Connect to the Socket.IO server
 const socket = io();
@@ -13,7 +14,8 @@ const app = document.getElementById('app');
 const routes = {
     '/': renderMainView,
     '/front-desk': renderFrontDesk,
-    '/lap-line-tracker': renderLapTracker
+    '/lap-line-tracker': renderLapTracker,
+    '/race-control': renderRaceControl
     // -- Add more routes and their corresponding renderers as needed --
 }
 
@@ -36,8 +38,7 @@ export const navigateTo = (url) => {
 window.addEventListener('popstate', router);
 
 // Initial call to set up the correct view based on the URL
-router();
-
+document.addEventListener('DOMContentLoaded', router);
 // --- Socket.IO Event Listeners ---
 
 // 2. Listen for successful connection
@@ -52,6 +53,9 @@ socket.on('viewChange', (viewName) => {
     }
     if (viewName === 'lapTracker') {
         navigateTo('/lap-tracker');
+    }
+    if (viewName === 'raceControl') {
+        navigateTo('/race-control');
     }
     // Add more view renderers as needed (e.g., observerView, safetyView)
 });
@@ -69,43 +73,3 @@ function login(roleName, password) {
     });
 }
 */
-socket.on("raceState", (raceState) => {
-
-    const flagText = document.getElementById("flag-text");
-    if (!flagText) return;
-
-    const mode = raceState.mode;
-
-    if (mode === "SAFE") {
-        flagText.textContent = "GREEN FLAG";
-    }
-
-    else if (mode === "HAZARD") {
-        flagText.textContent = "YELLOW FLAG";
-    }
-
-    else if (mode === "DANGER") {
-        flagText.textContent = "RED FLAG";
-    }
-
-    else if (mode === "FINISHED") {
-        flagText.textContent = "CHEQUERED FLAG";
-    }
-
-});
-
-document.getElementById("safe-btn")?.addEventListener("click", () => {
-    socket.emit("setMode", "SAFE");
-});
-
-document.getElementById("hazard-btn")?.addEventListener("click", () => {
-    socket.emit("setMode", "HAZARD");
-});
-
-document.getElementById("danger-btn")?.addEventListener("click", () => {
-    socket.emit("setMode", "DANGER");
-});
-
-document.getElementById("finish-btn")?.addEventListener("click", () => {
-    socket.emit("setMode", "FINISHED");
-});
