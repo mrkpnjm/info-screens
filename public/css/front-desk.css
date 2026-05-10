@@ -1,0 +1,115 @@
+/* Main Layout Container */
+.fd-layout {
+    display: flex;
+    flex-direction: column;
+    /* Use 100vw to ignore the parent container's width restrictions */
+    width: 100%; 
+    padding: 40px 60px;
+}
+
+/* CONTENT AREA: Side-by-Side Registration and Races */
+.fd-main-content {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 100px; /* Increased gap for better visual separation */
+    width: 100%;
+}
+
+/* Registration Form Section */
+.registration-side {
+    width: 600px; /* Keeps the form size fixed */
+    flex-shrink: 0; /* Prevents the form from squishing */
+}
+
+/* 2-column Grid for Inputs */
+.driver-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    column-gap: 40px;
+    row-gap: 25px;
+    margin-bottom: 30px;
+}
+
+.driver-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers label over input */
+}
+
+.driver-input-group label {
+    font-weight: 900;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.driver-input-group input {
+    width: 100%;
+    height: 55px;
+    background-color: #d9d9d9;
+    border: none;
+    border-radius: 4px;
+    padding: 0 20px;
+    font-size: 18px;
+    outline: none;
+    font-family: inherit;
+    color: #1a1a1a
+}
+
+.driver-input-group input:focus {
+    box-shadow: 0 0 0 3px #4fa3b8;
+}
+
+/* DIV for Button Row */
+.fd-main-button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px; /* Space between the two buttons */
+    margin-top: 20px;
+    width: 100%; /* Spans the full width of the input grid above it */
+}
+
+.fd-main-button-row button {
+    flex: 1;                  /* Makes both buttons exactly 50% width */
+    height: 70px;
+    border: none;
+    border-radius: 25px;      /* Rounded pill shape */
+    font-size: 18px;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    background-color: #4499b8;
+    color: #000000;
+}
+
+.fd-main-button-row button:hover {
+    background-color: #3e8ca6;
+}
+
+.fd-main-button-row button:active {
+    transform: scale(0.98);
+}
+
+/* Right side for Race History */
+.races-display-side {
+    flex: 1;
+}
+
+.races-display-side h2 {
+    font-size: 28px;
+    margin-top: 0;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+/* Card Styling for items in #raceList */
+.fd-race-card {
+    background: #383838;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border-left: 5px solid #4fa3b8;
+}
