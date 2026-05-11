@@ -17,6 +17,12 @@ let raceState = {
   cars: {}                // Dynamic lap data
 }
 
+const resequenceRaces = () => {
+  raceHistory.forEach((race, index) => {
+    race.name = `Race ${index + 1}`;
+  });
+};
+
 module.exports = function(io) {
 
   const prepareNextRace = () => {
@@ -33,7 +39,7 @@ module.exports = function(io) {
       currentRaceIndex = nextIndex;
       raceState.lifecycle = 'race_ready';
       raceState.safety = 'Danger';
-      raceState.raceName = `Race ${currentRaceIndex + 1}`;
+      raceState.raceName = nextRace.name;
       raceState.nextRaceData = nextRace; // Pass the driver list to the UI
       raceState.startTime = null;
 
@@ -139,11 +145,12 @@ module.exports = function(io) {
         id: Date.now(), // Simple unique ID based on timestamp
         drivers: drivers, // Array of 8 names from the frontend
         timestamp: new Date().toLocaleTimeString(),
-        name: `Race ${raceHistory.length + 1}`
+        name: '' // Will be set by resequenceRaces()
       };
 
       raceHistory.push(newRace); // Save to "database"
-      console.log(`Race ${raceHistory.length} registered with ${drivers.length} drivers.`);
+      resequenceRaces(); // Update all names (Race 1, Race 2, etc.)
+      console.log(`${newRace.name} registered with ${drivers.length} drivers.`);
 
       // If we were in "no-race" mode, automatically move to "race-ready" for the first race
       if (raceState.lifecycle === 'no_race') {
@@ -158,55 +165,53 @@ module.exports = function(io) {
       // Find the index of the race with the matching ID
       const index = raceHistory.findIndex(r => r.id === updatedData.id);
     
-      if(index !== -1) {
-        // Update the drivers but keep the original ID and timestamp
-        raceHistory[index].drivers = updatedData.drivers;
+      if(index === -1) return;
+      // Update the drivers but keep the original ID and timestamp
+      raceHistory[index].drivers = updatedData.drivers;
 
-        console.log(`Race ID ${updatedData.id} updated.`);
-
-        // SYNC CHECK: IS THIS THE RACE CURRENTLY LOADED IN RACE CONTROL
-        // We check, if nextRaceData exists and if its ID matches the one being edited
-        if (raceState.nextRaceData && raceState.nextRaceData.id === updatedData.id) {
-
-          // Update the state's reference to the data
-          raceState.nextRaceData = raceHistory[index];
-        }
-
-        io.emit('race_status_changed', raceState);
-
-        // Broadcast the updated history to everyone
-        io.emit('updateRaces', getUpcomingRaces());
+      // SYNC CHECK: IS THIS THE RACE CURRENTLY LOADED IN RACE CONTROL
+      // We check, if nextRaceData exists and if its ID matches the one being edited
+      // If this is the active race, update the live state too
+      if (raceState.nextRaceData && raceState.nextRaceData.id === updatedData.id) {
+          raceState.nextRaceData.drivers = updatedData.drivers;
+          io.emit('race_status_changed', raceState);
       }
+
+      console.log(`Race ID ${updatedData.id} updated.`);
+
+      // Broadcast the updated history to everyone
+      io.emit('updateRaces', getUpcomingRaces());
     });
 
     socket.on('deleteRace', (raceId) => {
       const deletedIndex = raceHistory.findIndex(r => r.id === raceId);
-      const isCurrentRace = raceState.nextRaceData && raceState.nextRaceData.id === raceId;
 
       if (deletedIndex === -1) return;
 
       // 2. Remove from history
       raceHistory.splice(deletedIndex, 1);
+      resequenceRaces(); // Resequence after deletion
 
       // 3. Handle Sync Logic
+        // If we deleted the active race, reload. 
+        // If we deleted a future race, the names are now updated.
+      const isCurrentRace = raceState.nextRaceData && raceState.nextRaceData.id === raceId;
       if (isCurrentRace) {
           // We set the index back by 1 so that prepareNextRace 
           // picks up the race that just shifted into the deleted slot.
           currentRaceIndex = deletedIndex - 1;
-
           // Reset lifecycle to 'no_race' so prepareNextRace knows it's 
           // allowed to pick up the "current" index if necessary
           raceState.lifecycle = 'no_race';
-          
           prepareNextRace();
-
           // Broadcast the new "Next Race" (or "No Race") to Race Control
           io.emit('race_status_changed', raceState);
-      } 
-      else if (deletedIndex < currentRaceIndex) {
+      } else if (deletedIndex < currentRaceIndex) {
           // If we deleted a race that was already finished (behind the current index),
           // we must decrement the index to keep our pointer aligned with the array shift.
           currentRaceIndex--;
+          raceState.raceName = raceHistory[currentRaceIndex].name;
+          io.emit('race_status_changed', raceState);
       }
 
       // 4. Update Front Desk list
