@@ -9,6 +9,7 @@ export const renderRaceControl = (container, socket) => {
     let currentLifecycle = 'idle';
     let startTime = null;
     let raceDurationMs = 600000; // Default 10 minutes
+    let autoFinishFired = false;
     
     container.innerHTML = `
         <div class="rc-layout">
@@ -126,6 +127,11 @@ export const renderRaceControl = (container, socket) => {
         const elapsed = now - startTime;
         const remaining = Math.max(0, raceDurationMs - elapsed);
 
+        if (remaining === 0 && !autoFinishFired) {
+            autoFinishFired = true;
+            updateGlobalState({ lifecycle: 'race_finished', safety: 'Danger' });
+        }
+
         const minutes = Math.floor(remaining / 60000);
         const seconds = Math.floor((remaining % 60000) / 1000);
 
@@ -203,6 +209,7 @@ export const renderRaceControl = (container, socket) => {
         currentLifecycle = lifecycle;
         startTime = raceState.startTime;
         if (raceState.durationMs) raceDurationMs = raceState.durationMs;
+        if (lifecycle === 'race_on') autoFinishFired = false;
 
         // Map lifecycle to view ID
         const views = {
