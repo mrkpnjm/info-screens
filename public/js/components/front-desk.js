@@ -27,6 +27,7 @@ export const renderFrontDesk = (container, socket) => {
                         <button id="registerBtn">Register a Race</button>
                         <button id="backBtn">Back to Main Menu</button>
                     </div>
+                    <p id="duplicateNameError" class="error-msg hidden"></p>
                 </div>
 
                 <div class="races-display-side hidden">
@@ -42,6 +43,7 @@ export const renderFrontDesk = (container, socket) => {
     const backBtn = container.querySelector('#backBtn');
     const inputs = container.querySelectorAll('.driver-input');
     const raceListContainer = container.querySelector('#raceList');
+    const errorText = container.querySelector('#duplicateNameError');
 
     // THE RENDER LOGIC
     const renderRaceCards = (history) => {
@@ -101,10 +103,25 @@ export const renderFrontDesk = (container, socket) => {
 
         const inputs = container.querySelectorAll('.driver-input');
 
+        errorText.classList.add('hidden');
+        errorText.classList.remove('error-shake');
+
+        // Force a "reflow" (this makes the browser notice the class was removed)
+        void errorText.offsetWidth;
+
         // Collect names that aren't empty, regardles in which box they are in
         const enteredNames = Array.from(inputs)
         .map(input => input.value.trim())
         .filter(name => name !== '');
+
+        const namesSet = new Set(enteredNames);
+
+        if (enteredNames.length > namesSet.size) {
+            errorText.innerText = "No duplicate drivers allowed!";
+            errorText.classList.remove('hidden');
+            errorText.classList.add('error-shake');
+            return;
+        }
 
         // Map those names to car numbers, starting from 1
         const drivers = enteredNames.map((name, index) => ({
