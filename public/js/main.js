@@ -8,6 +8,7 @@ import { renderRaceControl } from './components/race-control.js';
 import { renderLeaderboard } from './components/leader-board.js';
 import { renderCountdown } from './components/race-countdown.js';
 import { renderRaceFlags } from './components/race-flags.js';
+import { renderNextRace } from './components/next-race.js';
 
 // 1. Connect to the Socket.IO server
 const socket = io();
@@ -21,9 +22,8 @@ const routes = {
     '/race-control': renderRaceControl,
     '/leader-board': renderLeaderboard,
     '/race-countdown': renderCountdown,
-    '/race-flags': renderRaceFlags
-    
-    // -- Add more routes and their corresponding renderers as needed --
+    '/race-flags': renderRaceFlags,
+    '/next-race': renderNextRace
 }
 
 // Create Router function

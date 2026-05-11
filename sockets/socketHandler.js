@@ -110,9 +110,19 @@ module.exports = function(io) {
         prepareNextRace(); // This increments currentRaceIndex
       }
 
-      // SPECIAL CASE: If Race Control says "start", set the clock
+      // SPECIAL CASE: If Race Control says "start", set the clock and auto-finish timer
       if (updates.lifecycle === 'race_on') {
-        if (!raceState.startTime) raceState.startTime = Date.now();
+        if (!raceState.startTime) {
+          raceState.startTime = Date.now();
+          setTimeout(() => {
+            if (raceState.lifecycle === 'race_on') {
+              raceState.lifecycle = 'race_finished';
+              raceState.safety = 'Danger';
+              io.emit('race_status_changed', raceState);
+              io.emit('updateRaces', getUpcomingRaces());
+            }
+          }, raceState.durationMs);
+        }
       }
 
       // Broadcast the updated "Reality" to every single connected device
