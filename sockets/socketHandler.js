@@ -63,9 +63,10 @@ module.exports = function(io) {
   const getUpcomingRaces = () => {
     // HIDDEN STATES: If the race is currently on the track OR just finished,
     // we only want to show the races that come AFTER it.
-    const isRaceActiveOrDone = 
-      raceState.lifecycle === 'race_on' || 
-      raceState.lifecycle === 'race_finished';
+    const isRaceActiveOrDone =
+        raceState.lifecycle === 'race_ready' ||
+        raceState.lifecycle === 'race_on' ||
+        raceState.lifecycle === 'race_finished';
 
     if (isRaceActiveOrDone) {
       return raceHistory.slice(currentRaceIndex + 1);
