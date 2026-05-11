@@ -7,6 +7,6 @@ Front-desk - when finished all registered races and register another, then the r
 Race-control - at the same time, race-control starts race counting from deleted ordinal. So after deleting one race, the front-desk's and race-control's race ordinals are shifted by one.
 
 Leaderboard - insert timer
-Race-control - CSS
+Race-control - CSS---DONE
 Front-desk - indexes and duplicate drivers; login view
 Mobile view---DONE
