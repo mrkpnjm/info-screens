@@ -136,12 +136,9 @@ export const renderLapTracker = (container, socket) => {
             showScreen('viewNoRace');
             carGrid.innerHTML = ''; // Wipe buttons if race ends
         } else {
-            // Only re-render buttons if we are transitioning to active race
-            // or if the grid is currently empty
-            if (carGrid.children.length === 0) {
-                showScreen('viewOngoingRace');
-                renderCarButtons(raceState);
-            }
+            // Always re-render so name edits show up immediately on the buttons. Necessary for editing drivers
+            showScreen('viewOngoingRace');
+            renderCarButtons(raceState);
         }
 
         // HANDLE SAFETY (VISUAL)
