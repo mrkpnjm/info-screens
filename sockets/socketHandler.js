@@ -1,5 +1,8 @@
 // sockets/socketHandler.js
 
+const isDevMode = process.env.DEV_MODE === 'true';
+const RACE_DURATION = isDevMode ? 60000 : 600000;
+
 // In-memory "database" (clears, if server restarts)
 let raceHistory = [];
 let currentRaceIndex = -1;
@@ -8,7 +11,7 @@ let raceState = {
   lifecycle: 'no_race',   // no_race, race_ready, race_on, race_finished
   safety: 'Danger',       // Safe, Hazard, Danger
   raceName: '',
-  timeRemaining: '10:00',
+  durationMs: RACE_DURATION,
   startTime: null,
   nextRaceData: null,     // Will store the next race in the queue
   cars: {}                // Dynamic lap data
