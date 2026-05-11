@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Next Race | Beachside Racetrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/leader-board.css"> <style>
+        .driver-card { background: #1a1a1a; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 20px; font-size: 32px; font-weight: 700; margin-bottom: 15px; }
+        .car-badge { background: #4096A6; color: #000; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 36px; font-weight: 900; }
+        .paddock-msg { background: #2ed573; color: #000; font-size: 28px; font-weight: 900; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <header class="top-nav">
+        <div class="brand">Racetrack MVP</div>
+        <div class="page-title">PADDOCK ASSIGNMENTS</div>
+    </header>
+
+    <div class="dashboard">
+        <div id="paddockMessage" class="paddock-msg hidden">🚨 PROCEED TO CARS IMMEDIATELY 🚨</div>
+        <div id="driverList">
+            <h2 style="text-align: center; color: #a0a0b0;">WAITING FOR NEXT SESSION...</h2>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const driverList = document.getElementById('driverList');
+        const paddockMessage = document.getElementById('paddockMessage');
+
+        // Listen for the queue updates from the Receptionist
+        socket.on('updateRaces', (races) => {
+            if (races.length > 0) {
+                const nextRace = races[0]; // The next race is always the first one in the queue
+                driverList.innerHTML = nextRace.drivers.map(d => `
+                    <div class="driver-card">
+                        <div class="car-badge">#${d.car}</div>
+                        <div>${d.name.toUpperCase()}</div>
+                    </div>
+                `).join('');
+            } else {
+                driverList.innerHTML = '<h2 style="text-align: center; color: #a0a0b0;">WAITING FOR NEXT SESSION...</h2>';
+            }
+        });
+
+        // Listen for the Safety Official setting the track to "Danger" (which means it's time to load cars)
+        socket.on('race_status_changed', (mode) => {
+            if (mode === 'Danger') {
+                paddockMessage.style.display = 'block';
+            } else {
+                paddockMessage.style.display = 'none';
+            }
+        });
+
+        // Request initial data on load
+        socket.on('connect', () => {
+            socket.emit('request_race_queue');
+        });
+    </script>
+</body>
+</html>

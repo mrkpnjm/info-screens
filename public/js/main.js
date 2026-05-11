@@ -1,24 +1,48 @@
 // public/js/main.js
-// Client-side logic for connecting to the Racetrack server
+import { renderMainView } from './components/main-view.js';
+import { renderFrontDesk } from './components/front-desk.js';
+import { renderLapTracker } from './components/lap-tracker.js';
+import { renderRaceControl } from './components/race-control.js';
 
-// 1. Connect to the Socket.IO server
 const socket = io();
+const app = document.getElementById('app');
 
-// 2. Listen for successful connection
+const routes = {
+    '/': renderMainView,
+    '/front-desk': renderFrontDesk,
+    '/lap-line-tracker': renderLapTracker,
+    '/race-control': renderRaceControl
+};
+
+const router = () => {
+    const path = window.location.pathname;
+    const renderFn = routes[path] || renderMainView; 
+    app.innerHTML = ''; 
+    renderFn(app, socket); 
+};
+
+// Make navigation globally available to break the import loop!
+window.navigateTo = (url) => {
+    history.pushState(null, null, url); 
+    router(); 
+};
+
+window.addEventListener('popstate', router);
+router(); 
+
 socket.on('connect', () => {
     console.log('Connected to Racetrack Server with ID:', socket.id);
 });
 
-// Template for the frontend team to use your authentication logic:
-/*
-function login(roleName, password) {
-    socket.emit('authenticate', { role: roleName, key: password }, (response) => {
-        if (response.success) {
-            console.log("Logged in!");
-            // Hide login screen, show dashboard
-        } else {
-            alert(response.message); // Shows the error after the 500ms server delay
-        }
-    });
-}
-*/
+// Global navigation: Click the logo to return to the Main Menu
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('brand')) {
+        window.navigateTo('/');
+    }
+});
+
+document.addEventListener('mouseover', (e) => {
+    if (e.target.classList.contains('brand')) {
+        e.target.style.cursor = 'pointer';
+    }
+});

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Flags | Beachside Racetrack</title>
+    <style>
+        /* The body itself acts as the giant flag */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #2C2C2C; /* Default track status */
+            transition: background 0.2s ease-in-out;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/flags.js"></script>
+</body>
+</html>

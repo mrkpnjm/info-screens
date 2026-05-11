@@ -1,0 +1,219 @@
+.rc-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    padding: 40px 60px;
+    background-color: #2c2c2c; /* Dark background from image */
+}
+
+.rc-view {
+    display: none;
+}
+
+.rc-view.active {
+    display: flex;
+    flex: 1; /* Takes up all space between header and bottom */
+    justify-content: center; /* Horizontal center */
+    align-items: center; /* Vertical center */
+}
+
+/* -----------------------------------
+   VIEW 2: NO ONGOING RACE 
+----------------------------------- */
+
+.rc-no-race-box {
+    background-color: #96CAFF; /* Light blue from Figma */
+    width: 750px;
+    height: 350px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rc-no-race-box h2 {
+    color: #000000;
+    font-size: 42px;
+    font-weight: 900;
+    margin: 0;
+}
+
+/* -----------------------------------
+   VIEW 2: RACE READY 
+----------------------------------- */
+
+.ready {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: 100%;
+}
+
+/* The Blue Container */
+.ready .next-race-box {
+    background-color: #96CAFF; /* Matching your No Race box and Figma */
+    width: 750px;
+    min-height: 400px;
+    border-radius: 20px;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    box-sizing: border-box;
+    margin-bottom: 30px; /* Space between the blue box and the green button */
+}
+
+/* The Title (NEXT RACE - Race 1) */
+.ready .box-title {
+    color: #000000;
+    font-size: 38px;
+    font-weight: 900;
+    margin-top: 0;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+}
+
+/* The Driver List Area - Uses a 2-Column Grid */
+.ready .competitor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
+    gap: 20px 40px; /* Vertical gap, horizontal gap */
+    width: 100%;
+}
+
+/* Individual Driver Rows */
+.ready .competitor {
+    color: #000000;
+    font-size: 24px;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+/* The START RACE Button */
+.ready .start-btn {
+    width: 320px;
+    height: 70px;
+    background-color: #47FF4D; /* Bright green */
+    color: #000000;
+    border: none;
+    border-radius: 35px; /* Pill shape */
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.2s;
+    text-transform: uppercase;
+    margin-top: 20px; /* Optional additional space if needed */
+}
+
+.ready .start-btn:hover {
+    background-color: #3ee643; /* slightly darker green */
+    transform: scale(1.02);
+}
+
+.ready .start-btn:active {
+    transform: scale(0.98);
+}
+
+/* -----------------------------------
+   VIEW 3: ONGOING RACE 
+----------------------------------- */
+
+.rc-view.ongoing.active {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Adds space between the blue box and the pink box */
+}
+
+/* The Main Blue Box */
+.ongoing .ongoing-race-box {
+    background-color: #96CAFF;
+    width: 750px;
+    min-height: 280px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+}
+
+/* Time Remaining Text and Clock */
+.ongoing-box-title {
+    color: #000000;
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+    margin: 0 0 30px 0;
+    text-transform: uppercase;
+}
+
+.race-clock {
+    font-size: 32px;
+    display: block; /* Puts the numbers on a new line */
+}
+
+/* Button Grid (2x2) */
+.race-state-button {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 80%; /* Centers the buttons within the blue box */
+}
+
+.race-state-button button {
+    height: 60px;
+    border: none;
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+    border-radius: 5px;
+}
+
+.race-state-button button:hover {
+    opacity: 0.8;
+}
+
+/* Specific Button Colors */
+.safe-btn { background-color: #47FF4D; color: #000000; }
+.hazard-btn { background-color: #F7FF12; color: #000000; }
+.danger-btn { background-color: #FF2121; color: #000000; }
+.finish-btn { background-color: #000000; color: #ffffff; }
+
+/* -----------------------------------
+   CURRENT MODE DISPLAY (Lower Box)
+----------------------------------- */
+
+.flag-display {
+    background-color: #F8A5A5; /* Pinkish-red background */
+    width: 320px;
+    height: 120px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.flag-title {
+    color: #000000;
+    font-size: 18px;
+    font-weight: 900;
+    margin: 0 0 10px 0;
+}
+
+/* The Status LED Circle */
+.flag-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #47FF4D; /* Default to Safe Green */
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}

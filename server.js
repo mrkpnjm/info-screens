@@ -29,48 +29,31 @@ const app = express();
 const server = http.createServer(app); 
 const io = new Server(server); 
 
-// --- 5. REQUIRED ROUTES ---
+// --- 5. ROUTES (Hybrid SPA & Static Configuration) ---
 
+// 1. Tell Express where to find CSS, JS, and Images
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Right now they just send text, but later you will change these to send actual HTML files.
+// 2. The Public Display Routes (Must come BEFORE the catch-all)
+// These remain standalone HTML files because they are just "dumb screens"
+const publicRoutes = ['leader-board', 'next-race', 'race-countdown', 'race-flags'];
 
-// Removed the slashes from these strings
-const requiredRoutes = [
-  'front-desk', 'race-control', 'lap-line-tracker', 
-  'leader-board', 'next-race', 'race-countdown', 'race-flags'
-];
-
-// Dynamically create the routes
-requiredRoutes.forEach(route => {
+publicRoutes.forEach(route => {
   app.get(`/${route}`, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'views', `${route}.html`));
   });
 });
 
-// The helpful homepage directory
-app.get('/', (req, res) => {
-  res.send(`
-    <h1>Beachside Racetrack Server</h1>
-    <p>The server is running! Choose an interface below:</p>
-    <ul>
-      <li><strong>Employees:</strong> 
-        <a href="/front-desk">Front Desk</a> | 
-        <a href="/race-control">Race Control</a> | 
-        <a href="/lap-line-tracker">Lap-line Tracker</a>
-      </li>
-      <li><strong>Public Displays:</strong> 
-        <a href="/leader-board">Leader Board</a> | 
-        <a href="/next-race">Next Race</a> | 
-        <a href="/race-countdown">Countdown</a> | 
-        <a href="/race-flags">Flags</a>
-      </li>
-    </ul>
-  `);
+const spaRoutes = ['/', '/front-desk', '/race-control', '/lap-line-tracker'];
+
+spaRoutes.forEach(route => {
+  app.get(route, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
 });
 
 // --- 6. REAL-TIME SOCKET.IO ---
-// Import the logic from your new socketHandler file
+// Import the logic from your socketHandler file
 const socketHandler = require('./sockets/socketHandler');
 
 // Pass the 'io' variable into that file to activate it
