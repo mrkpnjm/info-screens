@@ -4,6 +4,8 @@
     width: 100%;
     min-height: 100vh;
     padding: 40px 60px;
+    box-sizing: border-box;
+    overflow-x: hidden;
     background-color: #2c2c2c; /* Dark background from image */
 }
 
@@ -24,7 +26,8 @@
 
 .rc-no-race-box {
     background-color: #96CAFF; /* Light blue from Figma */
-    width: 750px;
+    width: 100%;
+    max-width: 750px;
     height: 350px;
     border-radius: 20px;
     display: flex;
@@ -54,7 +57,8 @@
 /* The Blue Container */
 .ready .next-race-box {
     background-color: #96CAFF; /* Matching your No Race box and Figma */
-    width: 750px;
+    width: 100%;
+    max-width: 750px;
     min-height: 400px;
     border-radius: 20px;
     flex-direction: column;
@@ -93,7 +97,8 @@
 
 /* The START RACE Button */
 .ready .start-btn {
-    width: 320px;
+    width: 100%;
+    max-width: 320px;
     height: 70px;
     background-color: #47FF4D; /* Bright green */
     color: #000000;
@@ -131,7 +136,8 @@
 /* The Main Blue Box */
 .ongoing .ongoing-race-box {
     background-color: #96CAFF;
-    width: 750px;
+    width: 100%;
+    max-width: 750px;
     min-height: 280px;
     border-radius: 20px;
     display: flex;
@@ -162,7 +168,8 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
-    width: 80%; /* Centers the buttons within the blue box */
+    width: 80%;
+    margin: 0 auto;
 }
 
 .race-state-button button {
@@ -192,7 +199,8 @@
 
 .flag-display {
     background-color: #F8A5A5; /* Pinkish-red background */
-    width: 320px;
+    width: 100%;
+    max-width: 320px;
     height: 120px;
     border-radius: 20px;
     display: flex;
@@ -224,7 +232,8 @@
 
 .finished-race-box {
     background-color: #96CAFF;
-    width: 750px;
+    width: 100%;
+    max-width: 750px;
     min-height: 280px;
     border-radius: 20px;
     display: flex;
@@ -256,7 +265,8 @@
 }
 
 .end-session-btn {
-    width: 320px;
+    width: 100%;
+    max-width: 320px;
     height: 70px;
     background-color: #FF2121;
     color: #ffffff;
@@ -275,4 +285,37 @@
 
 .end-session-btn:active {
     transform: scale(0.97);
+}
+
+@media (max-width: 800px) {
+    .rc-layout {
+        padding: 20px 15px;
+    }
+
+    .ready .box-title {
+        font-size: 24px;
+    }
+
+    .ready .competitor {
+        font-size: 18px;
+    }
+
+    .rc-no-race-box {
+        height: auto;
+        padding: 40px 20px;
+    }
+
+    .rc-no-race-box h2 {
+        font-size: 28px;
+    }
+
+    .ongoing .ongoing-race-box,
+    .finished-race-box,
+    .ready .next-race-box {
+        padding: 20px 15px;
+    }
+
+    .race-state-button {
+        width: 100%;
+    }
 }
