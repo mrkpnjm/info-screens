@@ -86,3 +86,54 @@ Public display for **Race Drivers**. No access code required.
   - **Yellow** — Hazard
   - **Red** — Danger
   - **Chequered** — Race Finished
+
+## 🌐 Accessing Racetrack Remotely with Pinggy
+
+This project's administrator is able to share his local development server with remote users using **Pinggy.io**.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Start your local server
+Ensure your Node.js server is running on your machine:
+```bash
+node server.js
+```
+
+### 2. Open a new Terminal window
+Do not close the terminal where your server is running.
+
+### 3. Run the Pinggy Command
+Type the following command:
+```bash
+ssh -p 443 -R0:localhost:3000 a.pinggy.io
+```
+
+### 4. Get your URL
+Pinggy will display a public URL in your terminal (e.g., `https://xxxx.run.pinggy-free.link`). Share this link with anyone who needs access.
+
+## 🛠️ Configuration Details
+### Using HTTP vs HTTPS
+
+By default, Pinggy provides both an htttp:// and https:// link. The latter is required for the Lap Tracker if users are accessing it via mobile devices, as many browser features (like keeping the screen awake) require a secure connection.
+
+### Persistent Connections
+
+The free tier of Pinggy will keep the tunnel open as long as your terminal session is active. If you close the terminal or disconnect from the internet:
+
+- The tunnel will close.
+
+- When you restart, you will receive a new, different URL.
+
+## ❓ Troubleshooting
+
+### "Permission Denied (publickey)"
+This usually means your computer doesn't have an SSH key. You can fix this by running:
+```bash
+ssh-keygen -t rsa
+```
+(Press Enter for all prompts, then try the Pinggy command again.)
+
+### "Port 3000 is not responding"
+Check your `server.js` terminal. If the local server isn't running or crashed, Pinggy will show a "502 Bad Gateway" error on the public link.
