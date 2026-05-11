@@ -40,7 +40,7 @@ export const renderFrontDesk = (container, socket) => {
     // Interactivity for the registration form
     const registerBtn = container.querySelector('#registerBtn');
     const backBtn = container.querySelector('#backBtn');
-    const inputs = document.querySelectorAll('.driver-input');
+    const inputs = container.querySelectorAll('.driver-input');
     const raceListContainer = container.querySelector('#raceList');
 
     // THE RENDER LOGIC
@@ -54,11 +54,12 @@ export const renderFrontDesk = (container, socket) => {
 
         racesSide.classList.remove('hidden');
 
-        raceListContainer.innerHTML = history.map((race, raceIndex) => `
+        raceListContainer.innerHTML = history.map((race) => `
             <div class="fd-race-card" data-id="${race.id}">
-                <h3>${race.name || `Race ${raceIndex + 1}`}</h3>
+                <h3>${race.name.toUpperCase()}</h3>
+
                 <div class="race-drivers" id="drivers-${race.id}">
-                    ${race.drivers.map((driver, driverIndex) => `
+                    ${race.drivers.map((driver) => `
                         <div class="driver-row">
                             <span>CAR ${driver.car}: </span>
                             <span class="driver-name" data-car="${driver.car}">${driver.name}</span>
