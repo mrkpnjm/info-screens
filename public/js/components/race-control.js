@@ -99,7 +99,7 @@ export const renderRaceControl = (container, socket) => {
         socket.emit('update_race_state', updates);
     };
 
-    // --- NEW: THE MATH ENGINE FROM COUNTDOWN ---
+    // --- THE MATH ENGINE FROM COUNTDOWN ---
     const updateTimer = () => {
         const clocks = container.querySelectorAll('.race-clock');
         
@@ -180,7 +180,7 @@ export const renderRaceControl = (container, socket) => {
         }        
     });
 
-    // SAFETY FLAG TRANSISTIONS
+    // SAFETY FLAG TRANSITIONS
     safeBtn.addEventListener('click', () => {
         updateGlobalState({ safety: 'Safe' });
     });
@@ -199,7 +199,7 @@ export const renderRaceControl = (container, socket) => {
         lastState = raceState;
         const { lifecycle, safety, nextRaceData } = raceState; // Removed timeRemaining from destructuring
 
-        // NEW: Update timer state variables
+        // Update timer state variables
         currentLifecycle = lifecycle;
         startTime = raceState.startTime;
         if (raceState.durationMs) raceDurationMs = raceState.durationMs;
