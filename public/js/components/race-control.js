@@ -1,6 +1,14 @@
+// public/js/components/race-control.js
+
 export const renderRaceControl = (container, socket) => {
     // Local variable to store the latest data from the server
     let lastState = {};
+    
+    // --- TIMER VARIABLES ---
+    let timerInterval;
+    let currentLifecycle = 'idle';
+    let startTime = null;
+    let raceDurationMs = 600000; // Default 10 minutes
     
     container.innerHTML = `
         <div class="rc-layout">
@@ -91,6 +99,44 @@ export const renderRaceControl = (container, socket) => {
         socket.emit('update_race_state', updates);
     };
 
+    // --- NEW: THE MATH ENGINE FROM COUNTDOWN ---
+    const updateTimer = () => {
+        const clocks = container.querySelectorAll('.race-clock');
+        
+        // Memory leak prevention: stop loop if we navigate away
+        if (clocks.length === 0 || !document.contains(clocks[0])) {
+            clearInterval(timerInterval);
+            return;
+        }
+
+        if (currentLifecycle === 'race_finished') {
+            clocks.forEach(c => c.innerText = '00:00');
+            return;
+        }
+
+        if (currentLifecycle !== 'race_on' || !startTime) {
+            // Show starting time if we are waiting for the safety official to start it
+            const mins = Math.floor(raceDurationMs / 60000);
+            clocks.forEach(c => c.innerText = `${mins.toString().padStart(2, '0')}:00`);
+            return;
+        }
+
+        // Calculate time left
+        const now = Date.now();
+        const elapsed = now - startTime;
+        const remaining = Math.max(0, raceDurationMs - elapsed);
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+
+        const displayTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        clocks.forEach(c => c.innerText = displayTime);
+    };
+
+    // Start the high-speed loop
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 100);
+
     // 1. LOGIN LOGIC
     loginBtn.addEventListener('click', () => {
         const keyInput = accessKeyInput.value;
@@ -151,7 +197,12 @@ export const renderRaceControl = (container, socket) => {
     // --- 3. UI SYNCHRONIZATION LOGIC ---
     const syncUI = (raceState) => {
         lastState = raceState;
-        const { lifecycle, safety, nextRaceData, timeRemaining, raceName } = raceState;
+        const { lifecycle, safety, nextRaceData } = raceState; // Removed timeRemaining from destructuring
+
+        // NEW: Update timer state variables
+        currentLifecycle = lifecycle;
+        startTime = raceState.startTime;
+        if (raceState.durationMs) raceDurationMs = raceState.durationMs;
 
         // Map lifecycle to view ID
         const views = {
@@ -175,8 +226,6 @@ export const renderRaceControl = (container, socket) => {
                 <div class="competitor">CAR ${d.car} - ${d.name.toUpperCase()}</div>
             `).join('');
         }
-
-        container.querySelectorAll('.race-clock').forEach(c => c.innerText = timeRemaining || "00:00");
 
         // Update Flag Circle
         const circle = container.querySelector('.flag-circle');
