@@ -9,4 +9,4 @@ Race-control - at the same time, race-control starts race counting from deleted 
 Leaderboard - insert timer
 Race-control - CSS
 Front-desk - indexes and duplicate drivers; login view
-Mobile view
+Mobile view---DONE
