@@ -11,9 +11,12 @@ export const renderLeaderboard = (container, socket) => {
             <div class="ongoing-race-box" style="width: 100%; max-width: 1000px; margin: 0 auto;">
                 <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 20px;">
                     <h2 class="ongoing-box-title" id="lb-race-name" style="color: #ffffff;">NO RACE</h2>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-size: 24px; font-weight: 900;">FLAG:</span>
-                        <div id="lb-flag-color" class="flag-circle" style="width: 40px; height: 40px;"></div>
+                    <div style="display: flex; align-items: center; gap: 25px;">
+                        <div style="font-size: 28px; font-weight: 900;" id="lb-timer">--:--</div>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span style="font-size: 24px; font-weight: 900;">FLAG:</span>
+                            <div id="lb-flag-color" class="flag-circle" style="width: 40px; height: 40px;"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -37,9 +40,33 @@ export const renderLeaderboard = (container, socket) => {
     const tbody = container.querySelector('#lb-body');
     const flagCircle = container.querySelector('#lb-flag-color');
     const raceNameTitle = container.querySelector('#lb-race-name');
+    const timerDisplay = container.querySelector('#lb-timer');
 
     let currentCars = {};
-    let driverMap = {}; // Maps car numbers to driver names!
+    let driverMap = {};
+    let raceLifecycle = 'no_race';
+    let startTime = null;
+    let raceDurationMs = 600000;
+
+    const updateTimer = () => {
+        if (!document.contains(timerDisplay)) { return; }
+
+        if (raceLifecycle === 'race_finished') {
+            timerDisplay.innerText = '00:00';
+            return;
+        }
+        if (raceLifecycle !== 'race_on' || !startTime) {
+            timerDisplay.innerText = '--:--';
+            return;
+        }
+
+        const remaining = Math.max(0, raceDurationMs - (Date.now() - startTime));
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    setInterval(updateTimer, 500);
 
     const renderTable = () => {
         tbody.innerHTML = '';
@@ -69,6 +96,10 @@ export const renderLeaderboard = (container, socket) => {
     };
 
     const updateDisplay = (state) => {
+        raceLifecycle = state.lifecycle;
+        startTime = state.startTime || null;
+        if (state.durationMs) raceDurationMs = state.durationMs;
+
         // Update Flag
         const colors = { 'Safe': '#47FF4D', 'Hazard': '#F7FF12', 'Danger': '#FF2121', 'Finished': '#000000' };
         flagCircle.style.backgroundColor = colors[state.safety] || '#FF2121';
