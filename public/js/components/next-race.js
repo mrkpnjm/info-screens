@@ -87,6 +87,7 @@ export const renderNextRace = (container, socket) => {
 
     socket.emit('get_current_state', (state) => {
         currentRaceState = state;
+        if (state.upcomingRaces) upcomingRaces = state.upcomingRaces;
         render();
     });
 

@@ -70,6 +70,7 @@ export const renderFrontDesk = (container, socket) => {
     // THE RENDER LOGIC
     const renderRaceCards = (history) => {
         const racesSide = container.querySelector('.races-display-side');
+        if (!racesSide) return;
 
         if (!history || history.length === 0) {
             racesSide.classList.add('hidden');
@@ -114,8 +115,8 @@ export const renderFrontDesk = (container, socket) => {
         // --- EMIT AUTHENTICATION REQUEST TO SERVER ---
         socket.emit('authenticate', { role: 'receptionist', key: keyInput }, (response) => {
             if (response.success) {
-                // Use the helper to change screens
-                showScreen('main')
+                showScreen('main');
+                renderRaceCards(response.upcomingRaces || []);
             } else {
                 // Show the error message (Wait for the 500ms penalty from the server!)
                 loginErrorText.innerText = response.message;
@@ -177,19 +178,20 @@ export const renderFrontDesk = (container, socket) => {
 
         // --- CASE: EDIT BUTTON CLICKED ---
         if (e.target.classList.contains('edit-btn')) {
-            const nameSpans = raceCard.querySelectorAll('.driver-name');
+            const driversContainer = raceCard.querySelector(`#drivers-${raceId}`);
 
-            nameSpans.forEach(span => {
-                const currentName = span.innerText;
+            const existing = {};
+            raceCard.querySelectorAll('.driver-name').forEach(span => {
+                existing[span.getAttribute('data-car')] = span.innerText;
+            });
 
-                // Grab the car number from the row
-                const carNumber = span.getAttribute('data-car');
+            driversContainer.innerHTML = [1,2,3,4,5,6,7,8].map(i => `
+                <div class="driver-row">
+                    <span class="car-badge">#${i}</span>
+                    <input type="text" class="edit-input" data-car="${i}" value="${existing[i] || ''}" placeholder="Driver name...">
+                </div>
+            `).join('');
 
-                // Pass that car number into a data attribute so we don't lose it
-                span.innerHTML =`<input type="text" class="edit-input" data-car="${carNumber}" value="${currentName}">`;
-            })
-
-            // Swap Edit button for Save button
             e.target.innerText = 'SAVE CHANGES';
             e.target.classList.replace('edit-btn', 'save-btn');
         }
