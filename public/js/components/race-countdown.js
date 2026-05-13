@@ -8,10 +8,10 @@ export const renderCountdown = (container, socket) => {
                 background: rgba(255,255,255,0.15); color: #fff; border: none;
                 padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer;
             ">FULLSCREEN</button>
-            <div id="countdown-status" style="background-color: #96CAFF; color: #000; font-size: 48px; font-weight: 900; padding: 20px 60px; border-radius: 20px; margin-bottom: 20px; transition: background-color 0.3s;">
+            <div id="countdown-status" style="background-color: #96CAFF; color: #000; font-size: clamp(20px, 5vw, 48px); font-weight: 900; padding: 20px 40px; border-radius: 20px; margin-bottom: 20px; transition: background-color 0.3s; text-align: center;">
                 TRACK STATUS: LOADING...
             </div>
-            <div id="countdown-timer" style="font-size: 300px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; text-shadow: 0 15px 30px rgba(0,0,0,0.5);">
+            <div id="countdown-timer" style="font-size: clamp(80px, 28vw, 300px); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; text-shadow: 0 15px 30px rgba(0,0,0,0.5);">
                 --:--
             </div>
         </div>

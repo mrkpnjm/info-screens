@@ -32,10 +32,16 @@ html, body {
     justify-content: space-between; /* Brand left, Title right */
     align-items: center;
     width: 100%;
-    margin-bottom: 60px; /* Space between header and form */
+    margin-bottom: 60px;
     flex-shrink: 0;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+@media (max-width: 600px) {
+    .header-row {
+        margin-bottom: 30px;
+    }
 }
 
 .brand {
@@ -47,12 +53,8 @@ html, body {
 }
 
 .page-title {
+    color: #C57979;
     font-size: clamp(16px, 4vw, 28px);
-}
-
-.page-title {
-    color: #C57979; /* Muted pink/coral color */
-    font-size: 28px;
     font-weight: 900;
     text-transform: uppercase;
     margin: 0;

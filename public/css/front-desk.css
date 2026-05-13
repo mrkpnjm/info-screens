@@ -10,11 +10,10 @@
 
 /* Pin the header */
 .fd-header-container {
-    position: absolute; /* Takes it out of the flow */
-    top: 40px;
-    left: 60px;
-    right: 60px;
-    z-index: 100;
+    width: 100%;
+    padding: 30px 60px 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .fd-login-view {
@@ -24,6 +23,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 0 60px;
+    box-sizing: border-box;
 }
 
 .fd-login-view.active { display: flex; }
@@ -32,7 +33,7 @@
     display: none;
     width: 100%;
     height: 100%;
-    padding: 140px 60px 40px 60px; /* 140px top padding protects the header area */
+    padding: 30px 60px 40px 60px;
     box-sizing: border-box;
     grid-template-columns: 600px 1fr;
     gap: 60px;
