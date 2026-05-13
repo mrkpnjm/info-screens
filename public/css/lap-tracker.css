@@ -10,6 +10,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
 }
 
 .brand {
@@ -43,8 +44,12 @@
     justify-content: center;
 }
 
-.view.active { display: flex; } /* Show only active */
+.view.active { display: flex; }
 .hidden { display: none !important; }
+
+.lap-tracker-layout .nav-back-btn {
+    margin-top: 20px;
+}
 
 /* -----------------------------------
    VIEW 2: NO ONGOING RACE 

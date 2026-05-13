@@ -80,19 +80,18 @@ export const renderFrontDesk = (container, socket) => {
 
         raceListContainer.innerHTML = history.map((race) => `
             <div class="fd-race-card" data-id="${race.id}">
-                <h3>${race.name.toUpperCase()}</h3>
-
+                <h3 class="fd-card-title">${race.name.toUpperCase()}</h3>
                 <div class="race-drivers" id="drivers-${race.id}">
                     ${race.drivers.map((driver) => `
                         <div class="driver-row">
-                            <span>CAR ${driver.car}: </span>
+                            <span class="car-badge">#${driver.car}</span>
                             <span class="driver-name" data-car="${driver.car}">${driver.name}</span>
                         </div>
                     `).join('')}
                 </div>
                 <div class="race-actions">
-                    <button class="edit-btn" data-id="${race.id}">EDIT RACE</button>
-                    <button class="delete-btn" data-id="${race.id}">DELETE RACE</button>
+                    <button class="edit-btn" data-id="${race.id}">Edit</button>
+                    <button class="delete-btn" data-id="${race.id}">Delete</button>
                 </div>
             </div>
         `).join('');
@@ -137,11 +136,15 @@ export const renderFrontDesk = (container, socket) => {
         // Force a "reflow" (this makes the browser notice the class was removed)
         void registerErrorText.offsetWidth;
 
-        // Collect names that aren't empty, regardles in which box they are in
-        const enteredNames = Array.from(inputs)
-        .map(input => input.value.trim())
-        .filter(name => name !== '');
+        // Collect drivers from whichever boxes have names, preserving their car number
+        const drivers = Array.from(inputs)
+            .filter(input => input.value.trim() !== '')
+            .map(input => ({
+                name: input.value.trim(),
+                car: input.getAttribute('data-car')
+            }));
 
+        const enteredNames = drivers.map(d => d.name);
         const namesSet = new Set(enteredNames);
 
         if (enteredNames.length > namesSet.size) {
@@ -150,12 +153,6 @@ export const renderFrontDesk = (container, socket) => {
             registerErrorText.classList.add('error-shake');
             return;
         }
-
-        // Map those names to car numbers, starting from 1
-        const drivers = enteredNames.map((name, index) => ({
-            name: name,
-            car: (index + 1).toString() // Assign 1 to the first name, 2 to the second and so on
-        }));
         
         if (drivers.length > 0) {
             socket.emit('registerRace', drivers); // Send reordered list to server
@@ -199,18 +196,27 @@ export const renderFrontDesk = (container, socket) => {
 
         // --- CASE: SAVE BUTTON CLICKED ---
         else if (e.target.classList.contains('save-btn')) {
-            // Look INSIDE this specific card for the inputs
             const editInputs = raceCard.querySelectorAll('.edit-input');
 
-            // Collect new names, filtering out empties
             const updatedDrivers = Array.from(editInputs)
                 .map(input => ({
                     name: input.value.trim(),
                     car: input.getAttribute('data-car')
                 }))
-                .filter(driver => driver.name !== ''); // Filter out empty names
-            
-            // Send updated list to server
+                .filter(driver => driver.name !== '');
+
+            const names = updatedDrivers.map(d => d.name);
+            const existingError = raceCard.querySelector('.edit-error');
+            if (existingError) existingError.remove();
+
+            if (names.length > new Set(names).size) {
+                const err = document.createElement('p');
+                err.className = 'fd-register-error-msg edit-error';
+                err.innerText = 'No duplicate drivers allowed!';
+                raceCard.querySelector('.race-actions').appendChild(err);
+                return;
+            }
+
             socket.emit('editRace', { id: Number(raceId), drivers: updatedDrivers });
         }
     });

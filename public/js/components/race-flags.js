@@ -3,6 +3,11 @@
 export const renderRaceFlags = (container, socket) => {
     container.innerHTML = `
         <div id="flag-fullscreen" style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 9999; transition: background-color 0.2s;">
+            <button id="flag-fullscreen-btn" style="
+                position: absolute; top: 20px; right: 20px;
+                background: rgba(0,0,0,0.25); color: #fff; border: none;
+                padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer;
+            ">FULLSCREEN</button>
             <h1 id="flag-text" style="font-size: 12vw; font-weight: 900; text-transform: uppercase; text-shadow: 0px 10px 30px rgba(0,0,0,0.5); text-align: center; padding: 20px 60px; border-radius: 30px; letter-spacing: 5px;">
                 LOADING
             </h1>
@@ -11,6 +16,17 @@ export const renderRaceFlags = (container, socket) => {
 
     const flagBg = container.querySelector('#flag-fullscreen');
     const flagText = container.querySelector('#flag-text');
+    const fullscreenBtn = container.querySelector('#flag-fullscreen-btn');
+
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullscreenBtn.innerText = 'EXIT FULLSCREEN';
+        } else {
+            document.exitFullscreen();
+            fullscreenBtn.innerText = 'FULLSCREEN';
+        }
+    });
 
     const updateFlagUI = (state) => {
         // Fallback to Danger if safety isn't defined yet

@@ -15,9 +15,18 @@
 
 .rc-view.active {
     display: flex;
-    flex: 1; /* Takes up all space between header and bottom */
-    justify-content: center; /* Horizontal center */
-    align-items: center; /* Vertical center */
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.rc-view.rc-col.active {
+    flex-direction: column;
+    gap: 20px;
+}
+
+.rc-layout .nav-back-btn {
+    margin-top: 5px;
 }
 
 /* -----------------------------------

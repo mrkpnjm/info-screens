@@ -3,6 +3,11 @@
 export const renderLeaderboard = (container, socket) => {
     container.innerHTML = `
         <div class="rc-layout">
+            <button id="lb-fullscreen-btn" style="
+                position: fixed; top: 20px; right: 20px;
+                background: rgba(255,255,255,0.15); color: #fff; border: none;
+                padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer;
+            ">FULLSCREEN</button>
             <div class="header-row">
                 <h1 class="brand">Racetrack MVP</h1>
                 <h2 class="page-title">LIVE LEADERBOARD</h2>
@@ -41,6 +46,17 @@ export const renderLeaderboard = (container, socket) => {
     const flagCircle = container.querySelector('#lb-flag-color');
     const raceNameTitle = container.querySelector('#lb-race-name');
     const timerDisplay = container.querySelector('#lb-timer');
+    const fullscreenBtn = container.querySelector('#lb-fullscreen-btn');
+
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullscreenBtn.innerText = 'EXIT FULLSCREEN';
+        } else {
+            document.exitFullscreen();
+            fullscreenBtn.innerText = 'FULLSCREEN';
+        }
+    });
 
     let currentCars = {};
     let driverMap = {};

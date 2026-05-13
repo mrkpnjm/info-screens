@@ -3,6 +3,11 @@
 export const renderCountdown = (container, socket) => {
     container.innerHTML = `
         <div class="rc-layout" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;">
+            <button id="cd-fullscreen-btn" style="
+                position: fixed; top: 20px; right: 20px;
+                background: rgba(255,255,255,0.15); color: #fff; border: none;
+                padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer;
+            ">FULLSCREEN</button>
             <div id="countdown-status" style="background-color: #96CAFF; color: #000; font-size: 48px; font-weight: 900; padding: 20px 60px; border-radius: 20px; margin-bottom: 20px; transition: background-color 0.3s;">
                 TRACK STATUS: LOADING...
             </div>
@@ -14,6 +19,17 @@ export const renderCountdown = (container, socket) => {
 
     const statusBadge = container.querySelector('#countdown-status');
     const timerDisplay = container.querySelector('#countdown-timer');
+    const fullscreenBtn = container.querySelector('#cd-fullscreen-btn');
+
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullscreenBtn.innerText = 'EXIT FULLSCREEN';
+        } else {
+            document.exitFullscreen();
+            fullscreenBtn.innerText = 'FULLSCREEN';
+        }
+    });
 
     let raceLifecycle = 'idle';
     let trackSafety = 'Safe';

@@ -138,4 +138,23 @@ html, body {
 
 .hidden {
     display: none !important;
-} 
+}
+
+.nav-back-btn {
+    background: transparent;
+    border: 2px solid #4096A6;
+    color: #4096A6;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s, color 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.nav-back-btn:hover {
+    background-color: #4096A6;
+    color: #000;
+}

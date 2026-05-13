@@ -1,6 +1,9 @@
 # Ignore the heavy dependencies folder
 node_modules/
 
+# Ignore persisted runtime state
+state.json
+
 # Ignore the secret environment variables
 .env
 

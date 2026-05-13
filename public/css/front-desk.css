@@ -144,11 +144,118 @@
     text-align: left;
 }
 
-/* Card Styling for items in #raceList */
+/* -----------------------------------
+   RACE CARDS
+----------------------------------- */
 .fd-race-card {
     background: #383838;
-    padding: 15px;
     border-radius: 10px;
     margin-bottom: 15px;
-    border-left: 5px solid #4fa3b8;
+    overflow: hidden;
+}
+
+.fd-card-title {
+    margin: 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    border-bottom: 1px solid #444;
+}
+
+/* Driver list */
+.race-drivers {
+    padding: 4px 0;
+}
+
+.driver-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 16px;
+    border-bottom: 1px solid #444;
+}
+
+.driver-row:last-child {
+    border-bottom: none;
+}
+
+.car-badge {
+    background: #4096A6;
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 3px 7px;
+    border-radius: 4px;
+    min-width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.driver-name {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* Edit inputs (edit mode) */
+.edit-input {
+    background: #2c2c2c;
+    border: 1px solid #4096A6;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 3px 8px;
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+}
+
+/* Action buttons */
+.race-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+}
+
+.edit-btn, .save-btn, .delete-btn {
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    font-family: inherit;
+    text-transform: uppercase;
+    transition: opacity 0.15s;
+}
+
+.edit-btn {
+    background: transparent;
+    border-color: #4096A6;
+    color: #4096A6;
+}
+
+.save-btn {
+    background: transparent;
+    border-color: #47FF4D;
+    color: #47FF4D;
+}
+
+.delete-btn {
+    background: transparent;
+    border-color: #FF2121;
+    color: #FF2121;
+}
+
+.edit-btn:hover, .save-btn:hover, .delete-btn:hover {
+    opacity: 0.7;
+}
+
+.fd-register-error-msg.edit-error {
+    grid-column: 1 / -1;
 }

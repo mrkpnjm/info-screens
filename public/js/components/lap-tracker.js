@@ -1,5 +1,7 @@
 // public/js/components/lap-tracker.js
 
+import { navigateTo } from '../main.js';
+
 export const renderLapTracker = (container, socket) => {
     container.innerHTML = `
         <div class ="lap-tracker-layout">
@@ -23,15 +25,16 @@ export const renderLapTracker = (container, socket) => {
                 <div class="no-race-box">
                     <h2>NO ONGOING RACE</h2>
                 </div>
+                <button class="nav-back-btn lt-back-btn hidden">Main Menu</button>
             </div>
 
             <div id="viewOngoingRace" class="view">
                 <p class="instruction">Tap a car's button exactly as it crosses the line.</p>
-                <div class="car-grid" id="dynamicCarGrid">
-                    </div>
+                <div class="car-grid" id="dynamicCarGrid"></div>
                 <div id="actionLog" class="log-box">
                     <p><em>Waiting for first lap...</em></p>
                 </div>
+                <button class="nav-back-btn lt-back-btn hidden">Main Menu</button>
             </div>
         </div>
     `;
@@ -41,6 +44,8 @@ export const renderLapTracker = (container, socket) => {
     const errorText = container.querySelector('#loginError');
     const logBox = container.querySelector('#actionLog');
     const carGrid = container.querySelector('#dynamicCarGrid');
+    const backBtns = container.querySelectorAll('.lt-back-btn');
+    backBtns.forEach(btn => btn.addEventListener('click', () => navigateTo('/')));
 
     // Helper function to switch screens
     function showScreen(screenId) {
@@ -111,10 +116,10 @@ export const renderLapTracker = (container, socket) => {
 
         socket.emit('authenticate', { role: 'observer', key: keyInput }, (response) => {
             if (response.success) {
-                // Adapt to TL's new state object
+                backBtns.forEach(btn => btn.classList.remove('hidden'));
                 const state = response.currentRaceState || response.state || {};
-                const isRaceActive = state.lifecycle === 'race_on';
-                
+                const isRaceActive = state.lifecycle === 'race_on' || state.lifecycle === 'race_finished';
+
                 if (!isRaceActive) {
                     showScreen('viewNoRace');
                 } else {
@@ -132,26 +137,26 @@ export const renderLapTracker = (container, socket) => {
 
     // 2. LISTEN FOR RACE STATUS CHANGES
     socket.on('race_status_changed', (raceState) => {
-        const isRaceActive = raceState.lifecycle === 'race_on';
+        const isRaceActive = raceState.lifecycle === 'race_on' || raceState.lifecycle === 'race_finished';
 
         if (!isRaceActive) {
             showScreen('viewNoRace');
-            carGrid.innerHTML = ''; // Wipe buttons if race ends
+            carGrid.innerHTML = '';
         } else {
-            // Always re-render so name edits show up immediately on the buttons. Necessary for editing drivers
             showScreen('viewOngoingRace');
             renderCarButtons(raceState);
         }
 
-        // HANDLE SAFETY (VISUAL)
+        // HANDLE SAFETY (VISUAL) — only apply red-flag disabling during an active race,
+        // not during race_finished where Danger simply means the chequered/finish state
         const body = document.body;
         const carButtons = container.querySelectorAll('.car-btn');
 
-        if (raceState.safety === 'Danger') {
-            body.style.border = "10px solid #FF2121"; // Red border warning
+        if (raceState.lifecycle === 'race_on' && raceState.safety === 'Danger') {
+            body.style.border = "10px solid #FF2121";
             carButtons.forEach(btn => btn.disabled = true);
-        } else if (raceState.safety === 'Hazard') {
-            body.style.border = "10px solid #F7FF12"; // Yellow border warning
+        } else if (raceState.lifecycle === 'race_on' && raceState.safety === 'Hazard') {
+            body.style.border = "10px solid #F7FF12";
             carButtons.forEach(btn => btn.disabled = false);
         } else {
             body.style.border = "none";
