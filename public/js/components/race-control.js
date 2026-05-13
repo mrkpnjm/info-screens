@@ -1,5 +1,7 @@
 // public/js/components/race-control.js
 
+import { navigateTo } from '../main.js';
+
 export const renderRaceControl = (container, socket) => {
     // Local variable to store the latest data from the server
     let lastState = {};
@@ -32,22 +34,21 @@ export const renderRaceControl = (container, socket) => {
             </div>
 
             <!-- VIEW 2: NO UPCOMING RACE -->
-            <div id="rcViewNoRace" class="rc-view">
+            <div id="rcViewNoRace" class="rc-view rc-col">
                 <div class="rc-no-race-box">
                     <h2>NO UPCOMING RACE</h2>
                 </div>
+                <button class="nav-back-btn rc-back-btn hidden">Main Menu</button>
             </div>
 
             <!-- VIEW 3: RACE READY -->
             <div id="rcViewNextRace" class="rc-view ready">
                 <div class="next-race-box">
                     <h2 class="box-title">NEXT RACE - <span id="nextRaceName">Unknown</span></h2>
-
                     <div class="competitor-grid" id="nextRaceCompetitors"></div>
-
-                    
                 </div>
                 <button id="startRaceBtn" class="start-btn">START RACE</button>
+                <button class="nav-back-btn rc-back-btn hidden">Main Menu</button>
             </div>
 
             <!-- VIEW 4: RACE ONGOING -->
@@ -61,20 +62,21 @@ export const renderRaceControl = (container, socket) => {
                         <button id="finishRaceBtn" class="finish-btn">FINISH</button>
                     </div>
                 </div>
-                
                 <div class="flag-display">
                     <h2 class="flag-title">CURRENT MODE:</h2>
                     <div class="flag-circle"></div>
                 </div>
+                <button class="nav-back-btn rc-back-btn hidden">Main Menu</button>
             </div>
 
             <!-- VIEW 5: RACE FINISHED -->
-            <div id="rcViewRaceFinished" class="rc-view">
+            <div id="rcViewRaceFinished" class="rc-view rc-col">
                 <div class="finished-race-box">
                     <h2 class="finished-box-title">TIME REMAINING:<div class="race-clock" id="timeRemaining">00:00</div></h2>
                     <div class="finished-instruction">RACE FINISHED - WAITING CARS TO REACH PIT...</div>
                     <button id="endSessionBtn" class="end-session-btn">END SESSION</button>
                 </div>
+                <button class="nav-back-btn rc-back-btn hidden">Main Menu</button>
             </div>
         </div>
     `;
@@ -82,6 +84,8 @@ export const renderRaceControl = (container, socket) => {
     const loginBtn = container.querySelector('#loginBtn');
     const accessKeyInput = container.querySelector('#accessKey');
     const errorText = container.querySelector('#loginError');
+    const backBtns = container.querySelectorAll('.rc-back-btn');
+    backBtns.forEach(btn => btn.addEventListener('click', () => navigateTo('/')));
 
     // HELPER FUNCTION TO SWITCH VIEWS
     const showScreen = (screenId) => {
@@ -153,7 +157,7 @@ export const renderRaceControl = (container, socket) => {
         // --- EMIT AUTHENTICATION REQUEST TO SERVER ---
         socket.emit('authenticate', { role: 'safety', key: keyInput }, (response) => {
             if (response.success) {
-                // Sync the UI with the current race state sent by the server
+                backBtns.forEach(btn => btn.classList.remove('hidden'));
                 syncUI(response.currentRaceState);
             } else {
                 // Show the error message (Wait for the 500ms penalty from the server!)

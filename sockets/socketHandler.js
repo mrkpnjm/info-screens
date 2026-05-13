@@ -1,9 +1,14 @@
 // sockets/socketHandler.js
 
+const fs = require('fs');
+const path = require('path');
+
 const isDevMode = process.env.DEV_MODE === 'true';
 const RACE_DURATION = isDevMode ? 60000 : 600000;
 
-// In-memory "database" (clears, if server restarts)
+const STATE_FILE = path.join(__dirname, '..', 'state.json');
+
+// In-memory state
 let raceHistory = [];
 let currentRaceIndex = -1;
 
@@ -13,8 +18,33 @@ let raceState = {
   raceName: '',
   durationMs: RACE_DURATION,
   startTime: null,
-  nextRaceData: null,     // Will store the next race in the queue
-  cars: {}                // Dynamic lap data
+  nextRaceData: null,
+  cars: {}
+};
+
+const saveState = () => {
+  try {
+    fs.writeFileSync(STATE_FILE, JSON.stringify({ raceHistory, currentRaceIndex, raceState }));
+  } catch (e) {
+    console.error('Failed to save state:', e.message);
+  }
+};
+
+// Restore persisted state on startup
+try {
+  if (fs.existsSync(STATE_FILE)) {
+    const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    raceHistory = data.raceHistory || [];
+    currentRaceIndex = data.currentRaceIndex !== undefined ? data.currentRaceIndex : -1;
+    if (data.raceState) Object.assign(raceState, data.raceState);
+    // Re-link nextRaceData to the live raceHistory object
+    if (currentRaceIndex >= 0 && currentRaceIndex < raceHistory.length) {
+      raceState.nextRaceData = raceHistory[currentRaceIndex];
+    }
+    console.log('State restored from file.');
+  }
+} catch (e) {
+  console.log('No saved state or corrupt file, starting fresh.');
 }
 
 const resequenceRaces = () => {
@@ -25,9 +55,33 @@ const resequenceRaces = () => {
 
 module.exports = function(io) {
 
+  // Re-schedule auto-finish timer if a race was ongoing when the server stopped
+  if (raceState.lifecycle === 'race_on' && raceState.startTime) {
+    const elapsed = Date.now() - raceState.startTime;
+    const remaining = Math.max(0, raceState.durationMs - elapsed);
+    if (remaining > 0) {
+      console.log(`Resuming race with ${(remaining / 1000).toFixed(1)}s remaining.`);
+      setTimeout(() => {
+        if (raceState.lifecycle === 'race_on') {
+          raceState.lifecycle = 'race_finished';
+          raceState.safety = 'Danger';
+          io.emit('race_status_changed', raceState);
+          io.emit('updateRaces', getUpcomingRaces());
+          saveState();
+        }
+      }, remaining);
+    } else {
+      // Race finished while the server was down
+      raceState.lifecycle = 'race_finished';
+      raceState.safety = 'Danger';
+      saveState();
+      console.log('Race finished while server was down, state updated.');
+    }
+  }
+
   const prepareNextRace = () => {
-    let nextIndex = (raceState.lifecycle === 'no_race' && raceHistory.length > currentRaceIndex) 
-        ? currentRaceIndex 
+    let nextIndex = (raceState.lifecycle === 'no_race' && raceHistory.length > currentRaceIndex)
+        ? currentRaceIndex
         : currentRaceIndex + 1;
 
     if (currentRaceIndex == -1) {
@@ -40,17 +94,16 @@ module.exports = function(io) {
       raceState.lifecycle = 'race_ready';
       raceState.safety = 'Danger';
       raceState.raceName = nextRace.name;
-      raceState.nextRaceData = nextRace; // Pass the driver list to the UI
+      raceState.nextRaceData = nextRace;
       raceState.startTime = null;
 
-// Initialize lap tracking for the specific cars in this race
       raceState.cars = {};
       nextRace.drivers.forEach(d => {
         if (d.car) {
-          raceState.cars[d.car] = { 
-            currentLap: 0, 
-            lapTimes: [], 
-            fastestLap: null, 
+          raceState.cars[d.car] = {
+            currentLap: 0,
+            lapTimes: [],
+            fastestLap: null,
             lapStartTime: null
           };
         }
@@ -63,12 +116,9 @@ module.exports = function(io) {
       raceState.nextRaceData = null;
       raceState.raceName = '';
     }
-  }
+  };
 
-  // Helper method for getting only upcoming races
   const getUpcomingRaces = () => {
-    // HIDDEN STATES: If the race is currently on the track OR just finished,
-    // we only want to show the races that come AFTER it.
     const isRaceActiveOrDone =
         raceState.lifecycle === 'race_ready' ||
         raceState.lifecycle === 'race_on' ||
@@ -77,18 +127,15 @@ module.exports = function(io) {
     if (isRaceActiveOrDone) {
       return raceHistory.slice(currentRaceIndex + 1);
     } else {
-      // If we are in 'race_ready' or 'no_race', 
-      // show the race at the current index (because it hasn't started yet).
       return raceHistory.slice(Math.max(0, currentRaceIndex));
     }
-  }
+  };
 
   io.on('connection', (socket) => {
     console.log('🔌 A device connected! (ID:', socket.id, ')');
 
-    // Send existing races to the new connection immediately
     socket.emit('updateRaces', getUpcomingRaces());
-    
+
     // --- AUTHENTICATION LOGIC ---
     socket.on('authenticate', (data, callback) => {
       const { role, key } = data;
@@ -100,24 +147,20 @@ module.exports = function(io) {
 
       if (key === keys[role]) {
         socket.join(role);
-        // Return the FULL current state so the UI syncs immediately
         callback({ success: true, currentRaceState: raceState, upcomingRaces: getUpcomingRaces() });
       } else {
         setTimeout(() => callback({ success: false, message: 'Invalid Key' }), 500);
       }
     });
 
-    // --- GLOBAL STATE CONTROL (from Race Control)
+    // --- GLOBAL STATE CONTROL (from Race Control) ---
     socket.on('update_race_state', (updates) => {
-      // Merge updates (for example if only 'safety' is sent, 'lifecycle' stays the same)
       Object.assign(raceState, updates);
 
-      // SPECIAL CASE: When race starts/prepares, update the front desk
       if (updates.lifecycle === 'race_ready') {
-        prepareNextRace(); // This increments currentRaceIndex
+        prepareNextRace();
       }
 
-      // SPECIAL CASE: If Race Control says "start", set the clock and auto-finish timer
       if (updates.lifecycle === 'race_on') {
         if (!raceState.startTime) {
           raceState.startTime = Date.now();
@@ -127,111 +170,95 @@ module.exports = function(io) {
               raceState.safety = 'Danger';
               io.emit('race_status_changed', raceState);
               io.emit('updateRaces', getUpcomingRaces());
+              saveState();
             }
           }, raceState.durationMs);
         }
       }
 
-      // Broadcast the updated "Reality" to every single connected device
+      saveState();
       io.emit('race_status_changed', raceState);
       io.emit('updateRaces', getUpcomingRaces());
     });
 
     // --- RACE REGISTRATION LOGIC ---
-
     socket.on('registerRace', (drivers) => {
-      // Create a race object with a timestamp or ID
       const newRace = {
-        id: Date.now(), // Simple unique ID based on timestamp
-        drivers: drivers, // Array of 8 names from the frontend
+        id: Date.now(),
+        drivers: drivers,
         timestamp: new Date().toLocaleTimeString(),
-        name: '' // Will be set by resequenceRaces()
+        name: ''
       };
 
-      raceHistory.push(newRace); // Save to "database"
-      resequenceRaces(); // Update all names (Race 1, Race 2, etc.)
+      raceHistory.push(newRace);
+      resequenceRaces();
       console.log(`${newRace.name} registered with ${drivers.length} drivers.`);
 
-      // If we were in "no-race" mode, automatically move to "race-ready" for the first race
       if (raceState.lifecycle === 'no_race') {
-          prepareNextRace();
-          io.emit('race_status_changed', raceState);
+        prepareNextRace();
+        io.emit('race_status_changed', raceState);
       }
+      saveState();
       io.emit('updateRaces', getUpcomingRaces());
     });
 
-    // -- RACE EDITING LOGIC --
+    // --- RACE EDITING LOGIC ---
     socket.on('editRace', (updatedData) => {
-      // Find the index of the race with the matching ID
       const index = raceHistory.findIndex(r => r.id === updatedData.id);
-    
-      if(index === -1) return;
-      // Update the drivers but keep the original ID and timestamp
+
+      if (index === -1) return;
       raceHistory[index].drivers = updatedData.drivers;
 
-      // SYNC CHECK: IS THIS THE RACE CURRENTLY LOADED IN RACE CONTROL
-      // We check, if nextRaceData exists and if its ID matches the one being edited
-      // If this is the active race, update the live state too
       if (raceState.nextRaceData && raceState.nextRaceData.id === updatedData.id) {
-          raceState.nextRaceData.drivers = updatedData.drivers;
-          io.emit('race_status_changed', raceState);
+        raceState.nextRaceData.drivers = updatedData.drivers;
+        io.emit('race_status_changed', raceState);
       }
 
       console.log(`Race ID ${updatedData.id} updated.`);
-
-      // Broadcast the updated history to everyone
+      saveState();
       io.emit('updateRaces', getUpcomingRaces());
     });
 
+    // --- RACE DELETION LOGIC ---
     socket.on('deleteRace', (raceId) => {
       const deletedIndex = raceHistory.findIndex(r => r.id === raceId);
 
       if (deletedIndex === -1) return;
 
-      // 2. Remove from history
       raceHistory.splice(deletedIndex, 1);
-      resequenceRaces(); // Resequence after deletion
+      resequenceRaces();
 
-      // 3. Handle Sync Logic
-        // If we deleted the active race, reload. 
-        // If we deleted a future race, the names are now updated.
       const isCurrentRace = raceState.nextRaceData && raceState.nextRaceData.id === raceId;
       if (isCurrentRace) {
-          // We set the index back by 1 so that prepareNextRace 
-          // picks up the race that just shifted into the deleted slot.
-          currentRaceIndex = deletedIndex - 1;
-          // Reset lifecycle to 'no_race' so prepareNextRace knows it's 
-          // allowed to pick up the "current" index if necessary
-          raceState.lifecycle = 'no_race';
-          prepareNextRace();
-          // Broadcast the new "Next Race" (or "No Race") to Race Control
-          io.emit('race_status_changed', raceState);
+        // Set index back by 1 so prepareNextRace picks up the race that
+        // shifted into the deleted slot (currentRaceIndex + 1 = deletedIndex).
+        currentRaceIndex = deletedIndex - 1;
+        prepareNextRace();
+        io.emit('race_status_changed', raceState);
       } else if (deletedIndex < currentRaceIndex) {
-          // If we deleted a race that was already finished (behind the current index),
-          // we must decrement the index to keep our pointer aligned with the array shift.
-          currentRaceIndex--;
-          raceState.raceName = raceHistory[currentRaceIndex].name;
-          io.emit('race_status_changed', raceState);
+        currentRaceIndex--;
+        raceState.raceName = raceHistory[currentRaceIndex].name;
+        io.emit('race_status_changed', raceState);
       }
 
-      // 4. Update Front Desk list
+      saveState();
       io.emit('updateRaces', getUpcomingRaces());
     });
 
     socket.on('get_current_state', (callback) => {
-      // Return the full state object (which includes raceHistory)
       callback(raceState);
-    })
+    });
 
-// --- LAP-LINE TRACKER LOGIC ---
+    // --- LAP-LINE TRACKER LOGIC ---
     socket.on('record_lap', (data, callback) => {
       const { carNumber } = data;
 
-      if (raceState.lifecycle !== 'race_on') {
+      const raceActive = raceState.lifecycle === 'race_on' || raceState.lifecycle === 'race_finished';
+      if (!raceActive) {
         return callback({ success: false, message: 'Race not active' });
       }
-      if (raceState.safety === 'Danger') {
-        return callback({ success: false, message: 'Track is Red - Laps suspended'});
+      if (raceState.lifecycle === 'race_on' && raceState.safety === 'Danger') {
+        return callback({ success: false, message: 'Track is Red - Laps suspended' });
       }
 
       const car = raceState.cars[carNumber];
@@ -240,19 +267,15 @@ module.exports = function(io) {
       }
 
       const now = Date.now();
-      
-      // FIX: Warmup Lap Logic (Lap countdown began from race start to first lap, 
-      // changed to LAP Starts when car crosses the lap first time.)
+
       if (car.currentLap === 0 && !car.lapStartTime) {
-          car.lapStartTime = now;
-          console.log(`⏱️ Car ${carNumber} crossed the line. Stopwatch started!`);
-          return callback({ success: true, message: 'Stopwatch started', warmup: true });
+        car.lapStartTime = now;
+        console.log(`⏱️ Car ${carNumber} crossed the line. Stopwatch started!`);
+        saveState();
+        return callback({ success: true, message: 'Stopwatch started', warmup: true });
       }
 
-      // Calculate time since they last crossed the line
       const lapTimeMs = now - car.lapStartTime;
-      
-      // Update their new start time for the next lap
       car.lapStartTime = now;
       car.currentLap++;
       car.lapTimes.push(lapTimeMs);
@@ -263,10 +286,11 @@ module.exports = function(io) {
 
       console.log(`⏱️ Car ${carNumber} completed Lap ${car.currentLap} in ${lapTimeMs / 1000}s`);
 
-      io.emit('lap_updated', { 
-        carNumber, 
-        currentLap: car.currentLap, 
-        fastestLap: car.fastestLap 
+      saveState();
+      io.emit('lap_updated', {
+        carNumber,
+        currentLap: car.currentLap,
+        fastestLap: car.fastestLap
       });
 
       callback({ success: true, lapTimeMs });

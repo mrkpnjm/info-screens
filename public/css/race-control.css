@@ -3,10 +3,14 @@
     flex-direction: column;
     width: 100%;
     min-height: 100vh;
-    padding: 40px 60px;
+    padding: 0 60px 40px;
     box-sizing: border-box;
     overflow-x: hidden;
-    background-color: #2c2c2c; /* Dark background from image */
+    background-color: #2c2c2c;
+}
+
+.rc-layout .top-nav {
+    padding: 30px 0 0;
 }
 
 .rc-view {
@@ -15,9 +19,18 @@
 
 .rc-view.active {
     display: flex;
-    flex: 1; /* Takes up all space between header and bottom */
-    justify-content: center; /* Horizontal center */
-    align-items: center; /* Vertical center */
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.rc-view.rc-col.active {
+    flex-direction: column;
+    gap: 20px;
+}
+
+.rc-layout .nav-back-btn {
+    margin-top: 5px;
 }
 
 /* -----------------------------------
