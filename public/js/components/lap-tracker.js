@@ -124,6 +124,8 @@ export const renderLapTracker = (container, socket) => {
             } else {
                 errorText.innerText = response.message;
                 errorText.classList.remove('hidden');
+                errorText.classList.add('error-shake');
+
             }
         });
     });
