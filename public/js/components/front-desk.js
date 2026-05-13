@@ -211,7 +211,8 @@ export const renderFrontDesk = (container, socket) => {
 
             if (names.length > new Set(names).size) {
                 const err = document.createElement('p');
-                err.className = 'fd-register-error-msg edit-error';
+                err.classList.remove('error-shake')
+                err.className = 'fd-register-error-msg edit-error error-shake';
                 err.innerText = 'No duplicate drivers allowed!';
                 raceCard.querySelector('.race-actions').appendChild(err);
                 return;
