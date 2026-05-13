@@ -5,14 +5,28 @@ export const renderFrontDesk = (container, socket) => {
     container.innerHTML = `
         <div class="fd-layout">
             <!-- PERSISTENT HEADER -->
-            <div class="header-row">
-                <h1 class="brand">Racetrack MVP</h1>
-                <h2 class="page-title">FRONT DESK</h2>
+            <div class="fd-header-container">
+                <header class="header-row">
+                    <h1 class="brand">Racetrack MVP</h1>
+                    <h2 class="page-title">FRONT DESK</h2>
+                </header>
+            </div>
+
+            <!-- VIEW 1: LOGIN -->
+            <div id="fdLoginView" class="fd-login-view active">
+                <section class="login-container">
+                    <div class="login-input-group">
+                        <label for="access-key">Password:</label>
+                        <input type="password" id="accessKey">
+                    </div>
+                    <button id="loginBtn" class="login-btn">LOGIN</button>
+                    <p id="loginError" class="error-msg hidden"></p>
+                </section>
             </div>
             
             <!-- VIEW 2: REGISTER A RACE -->
-            <div class="fd-main-content">
-                <div class="registration-side">
+            <div id="fdMainView" class="fd-main-view">
+                <section class="registration-side">
                     <div class="driver-input-grid">
                         ${[1, 2, 3, 4, 5, 6, 7, 8].map(i => `
                             <div class="driver-input-group">
@@ -26,14 +40,14 @@ export const renderFrontDesk = (container, socket) => {
                     <div class="fd-main-button-row">
                         <button id="registerBtn">Register a Race</button>
                         <button id="backBtn">Back to Main Menu</button>
+                        <p id="duplicateNameError" class="fd-register-error-msg hidden"></p>
                     </div>
-                    <p id="duplicateNameError" class="error-msg hidden"></p>
-                </div>
+                </section>
 
-                <div class="races-display-side hidden">
+                <section class="races-display-side hidden">
                     <h2>RACES</h2>
                     <div id="raceList"><!-- Races appear here --></div>
-                </div>
+                </section>
             </div>
         </div>
     `;
@@ -43,7 +57,15 @@ export const renderFrontDesk = (container, socket) => {
     const backBtn = container.querySelector('#backBtn');
     const inputs = container.querySelectorAll('.driver-input');
     const raceListContainer = container.querySelector('#raceList');
-    const errorText = container.querySelector('#duplicateNameError');
+    const registerErrorText = container.querySelector('#duplicateNameError');
+
+    // HELPER FUNCTION TO SWITCH VIEWS
+    const showScreen = (view) => {
+        if (view === 'main') {
+            container.querySelector('#fdMainView').classList.add('active');
+            container.querySelector('#fdLoginView').classList.remove('active');
+        }
+    };
 
     // THE RENDER LOGIC
     const renderRaceCards = (history) => {
@@ -76,26 +98,32 @@ export const renderFrontDesk = (container, socket) => {
         `).join('');
     };
 
-    // PERSISTENCE: ASK FOR HISTORY IMMEDIATELY WHEN VIEW LOADS
-    /* socket.emit('authenticate', { role: 'receptionist', key: 'RECEPTIONIST_KEY_HERE' }, (response) => {
-        if (response.success) {
-            // Use the filtered list (upcomingRaces) we added to the server-side callback
-            renderRaceCards(response.upcomingRaces || []);
-        } else {
-            console.error("Auth failed:", response.message);
-            navigateTo('/'); // Kick them back to home if auth fails
-        }
-    }); */
+    const loginBtn = container.querySelector('#loginBtn');
+    const accessKeyInput = container.querySelector('#accessKey');
+    const loginErrorText = container.querySelector('#loginError');
 
-    // --- UPDATED INITIALIZATION ---
-    socket.emit('authenticate', { role: 'receptionist', key: 'secret_key_123' }, (response) => {
-        if (response.success) {
-            // Use the filtered list from the server
-            renderRaceCards(response.upcomingRaces || []);
-        } else {
-            console.warn("Auth failed, but staying on page for development:", response.message);
-            // During development, if auth fails, we should still ask for current state
-        }
+    // 1. LOGIN LOGIC
+    loginBtn.addEventListener('click', () => {
+        const keyInput = accessKeyInput.value;
+        
+        // Hide previous errors
+        loginErrorText.classList.add('hidden');
+        loginErrorText.classList.remove('error-shake');
+        
+        void loginErrorText.offsetWidth;
+
+        // --- EMIT AUTHENTICATION REQUEST TO SERVER ---
+        socket.emit('authenticate', { role: 'receptionist', key: keyInput }, (response) => {
+            if (response.success) {
+                // Use the helper to change screens
+                showScreen('main')
+            } else {
+                // Show the error message (Wait for the 500ms penalty from the server!)
+                loginErrorText.innerText = response.message;
+                loginErrorText.classList.remove('hidden');
+                loginErrorText.classList.add('error-shake')
+            }
+        });
     });
 
     // REGISTRATION LOGIC
@@ -103,11 +131,11 @@ export const renderFrontDesk = (container, socket) => {
 
         const inputs = container.querySelectorAll('.driver-input');
 
-        errorText.classList.add('hidden');
-        errorText.classList.remove('error-shake');
+        registerErrorText.classList.add('hidden');
+        registerErrorText.classList.remove('error-shake');
 
         // Force a "reflow" (this makes the browser notice the class was removed)
-        void errorText.offsetWidth;
+        void registerErrorText.offsetWidth;
 
         // Collect names that aren't empty, regardles in which box they are in
         const enteredNames = Array.from(inputs)
@@ -117,9 +145,9 @@ export const renderFrontDesk = (container, socket) => {
         const namesSet = new Set(enteredNames);
 
         if (enteredNames.length > namesSet.size) {
-            errorText.innerText = "No duplicate drivers allowed!";
-            errorText.classList.remove('hidden');
-            errorText.classList.add('error-shake');
+            registerErrorText.innerText = "No duplicate drivers allowed!";
+            registerErrorText.classList.remove('hidden');
+            registerErrorText.classList.add('error-shake');
             return;
         }
 
