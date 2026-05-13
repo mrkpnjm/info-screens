@@ -119,12 +119,7 @@ module.exports = function(io) {
   };
 
   const getUpcomingRaces = () => {
-    const isRaceActiveOrDone =
-        raceState.lifecycle === 'race_ready' ||
-        raceState.lifecycle === 'race_on' ||
-        raceState.lifecycle === 'race_finished';
-
-    if (isRaceActiveOrDone) {
+    if (raceState.lifecycle === 'race_on' || raceState.lifecycle === 'race_finished') {
       return raceHistory.slice(currentRaceIndex + 1);
     } else {
       return raceHistory.slice(Math.max(0, currentRaceIndex));
@@ -246,7 +241,7 @@ module.exports = function(io) {
     });
 
     socket.on('get_current_state', (callback) => {
-      callback(raceState);
+      callback({ ...raceState, upcomingRaces: getUpcomingRaces() });
     });
 
     // --- LAP-LINE TRACKER LOGIC ---
