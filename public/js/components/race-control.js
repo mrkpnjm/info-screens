@@ -14,10 +14,10 @@ export const renderRaceControl = (container, socket) => {
     container.innerHTML = `
         <div class="rc-layout">
             <!-- PERSISTENT HEADER -->
-            <div class="header-row">
-                <h1 class="brand">Racetrack MVP</h1>
-                <h2 class="page-title">RACE CONTROL</h2>
-            </div>
+            <header class="top-nav">
+                <div class="brand">Racetrack MVP</div>
+                <div class="page-title">RACE CONTROL</div>
+            </header>
 
             <!-- VIEW 1: LOGIN -->
             <div id="rcViewLogin" class="rc-view active">
@@ -159,6 +159,7 @@ export const renderRaceControl = (container, socket) => {
                 // Show the error message (Wait for the 500ms penalty from the server!)
                 errorText.innerText = response.message;
                 errorText.classList.remove('hidden');
+                errorText.classList.add('error-shake');
             }
         });
     });
