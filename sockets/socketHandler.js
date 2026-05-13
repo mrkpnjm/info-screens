@@ -93,7 +93,7 @@ module.exports = function(io) {
     socket.on('authenticate', (data, callback) => {
       const { role, key } = data;
       const keys = {
-        receptionist: process.env.receptionist_key || 'secret_key_123',
+        receptionist: process.env.receptionist_key,
         observer: process.env.observer_key,
         safety: process.env.safety_key
       };
